@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Game KÍNH VẠN HOA - Sống Lại Ký Ức Học Trò</title>
+    <meta name="description" content="Khám phá KÍNH VẠN HOA - board game suy luận xã hội, nơi mỗi lựa chọn của bạn sẽ định đoạt số phận của cả một tập thể.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/phosphor-icons"></script>
+
+    <style>
+        /* Custom styles to match the retro theme */
+        body {
+            background-color: #FDF6E3; /* Màu giấy cũ */
+            color: #5a4635; /* Màu chữ nâu đậm hơn */
+            font-family: 'Be Vietnam Pro', sans-serif;
+            font-weight: 400;
+        }
+        h1, h2, h3, h4, .font-special {
+            font-family: 'Playfair Display', serif;
+            color: #8B4513; /* Màu nâu yên ngựa */
+        }
+        .bg-notebook {
+            background-image:
+                linear-gradient(to right, rgba(210, 180, 140, 0.2) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(210, 180, 140, 0.2) 1px, transparent 1px);
+            background-size: 1.5rem 1.5rem;
+            background-color: #FDF6E3;
+        }
+        .hero-bg {
+            background-image: url('https://placehold.co/1920x1080/8B4513/FFFFFF?text=Ảnh+nền+bộ+game+Kính+Vạn+Hoa');
+            background-size: cover;
+            background-position: center;
+        }
+        .card {
+            perspective: 1000px;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .card:hover .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 0.75rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2.5rem;
+            padding-left: 2.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0.4rem;
+            top: 0.4rem;
+            width: 1px;
+            height: 100%;
+            background-color: #d2a679;
+        }
+         .timeline-item:last-child::before {
+            height: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 0.1rem;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 50%;
+            background-color: #FDF6E3;
+            border: 2px solid #d2a679;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="bg-notebook">
+
+    <header id="navbar" class="bg-[#FDF6E3] bg-opacity-80 backdrop-blur-sm sticky top-0 z-50 transition-shadow duration-300">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" class="text-3xl text-amber-800 font-bold font-special">Kính Vạn Hoa</a>
+            <nav class="hidden lg:flex items-center space-x-6 text-lg font-medium">
+                <a href="#gioi-thieu" class="hover:text-orange-600 transition-colors">Câu chuyện</a>
+                <a href="#luat-choi" class="hover:text-orange-600 transition-colors">Luật chơi</a>
+                <a href="#vai-tro" class="hover:text-orange-600 transition-colors">Vai trò</a>
+                <a href="#kich-ban" class="hover:text-orange-600 transition-colors">Kịch bản</a>
+                <a href="#dang-ky" class="hover:text-orange-600 transition-colors">Thử nghiệm</a>
+            </nav>
+            <button id="mobile-menu-button" class="lg:hidden">
+                <i class="ph-list text-3xl"></i>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden px-6 pb-4 flex flex-col space-y-3">
+            <a href="#gioi-thieu" class="hover:text-orange-600 transition-colors text-lg">Câu chuyện</a>
+            <a href="#luat-choi" class="hover:text-orange-600 transition-colors text-lg">Luật chơi</a>
+            <a href="#vai-tro" class="hover:text-orange-600 transition-colors text-lg">Vai trò</a>
+            <a href="#kich-ban" class="hover:text-orange-600 transition-colors text-lg">Kịch bản</a>
+            <a href="#dang-ky" class="hover:text-orange-600 transition-colors text-lg">Thử nghiệm</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="h-screen min-h-[700px] hero-bg flex items-center justify-center relative">
+            <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+            <div class="relative text-center text-white p-6">
+                <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-wider text-white whitespace-nowrap" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">KÍNH VẠN HOA</h1>
+                <p class="mt-4 text-2xl md:text-3xl max-w-4xl mx-auto font-special" style="text-shadow: 2px 2px 6px rgba(0,0,0,0.9); color: #FFDE59;">"Khi niềm tin trong lớp học bị thử thách, <br class="hidden md:block"> bạn là người hòa giải hay kẻ phá hoại?"</p>
+                <a href="#dang-ky" class="mt-8 inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold text-xl py-3 px-10 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 font-special tracking-wider">
+                    Đăng ký thử nghiệm
+                </a>
+            </div>
+        </section>
+
+        <section id="gioi-thieu" class="py-16 md:py-24">
+            <div class="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+                <div class="text-center md:text-left">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">Câu chuyện của "KÍNH VẠN HOA"</h2>
+                    <div class="text-lg leading-relaxed space-y-4">
+                        <p>
+                            Bạn còn nhớ những câu chuyện về tuổi học trò của tác giả Nguyễn Nhật Ánh? Những mâu thuẫn ngây ngô, những tình bạn chân thành và những bài học đầu đời... Board game KÍNH VẠN HOA sẽ đưa bạn trở lại chính những ký ức đó, nhưng lần này, bạn là người quyết định diễn biến câu chuyện.
+                        </p>
+                         <p class="font-medium">
+                            Trò chơi không chỉ là cuộc đấu trí giữa các phe, mà còn là hành trình khám phá và rèn luyện kỹ năng giải quyết mâu thuẫn, thấu cảm và giao tiếp - những bài học quý giá cho lứa tuổi học sinh.
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <img src="https://placehold.co/600x800/fdf6e3/333333?text=Bìa+sách+Kính+Vạn+Hoa" alt="Bìa sách Kính Vạn Hoa" class="rounded-lg shadow-2xl mx-auto transform md:rotate-3 transition hover:rotate-0 hover:scale-105">
+                </div>
+            </div>
+        </section>
+
+        <section id="luat-choi" class="py-16 md:py-24 bg-amber-50 bg-opacity-50">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-12">Mục tiêu trò chơi</h2>
+                <div class="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+                    <div class="bg-white p-8 rounded-lg shadow-lg border-2 border-dashed border-sky-400">
+                        <i class="ph-users-three text-6xl text-sky-500 mx-auto"></i>
+                        <h3 class="text-3xl font-bold my-4 text-sky-700">Phe Hòa Đồng</h3>
+                        <p class="text-lg">"Tìm và loại bỏ tất cả Học Sinh Gây Rối để bảo vệ sự đoàn kết của lớp học."</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg border-2 border-dashed border-rose-400">
+                         <i class="ph-smiley-wink text-6xl text-rose-500 mx-auto"></i>
+                        <h3 class="text-3xl font-bold my-4 text-rose-700">Phe Gây Rối</h3>
+                        <p class="text-lg">"Thao túng, chia rẽ và loại bỏ dần phe Hòa Đồng cho đến khi chiếm đa số."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="vai-tro" class="py-16 md:py-24">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">Các vai trò trong lớp</h2>
+                <p class="text-xl max-w-3xl mx-auto mb-12">Mỗi người chơi sẽ nhận một vai trò bí mật. Hãy khám phá chức năng đặc biệt của từng thành viên trong lớp học này!</p>
+                
+                <h3 class="text-3xl font-bold text-sky-700 mb-8 font-special">-- Ban cán sự lớp (Phe Hòa Đồng) --</h3>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
+                    <div class="card h-80">
+                        <div class="card-inner">
+                            <div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg">
+                                <i class="ph-star text-7xl text-sky-600"></i>
+                                <h4 class="text-2xl font-bold mt-4">Lớp Trưởng</h4>
+                                <p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p>
+                            </div>
+                            <div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left">
+                                <h4 class="text-xl font-bold mb-2">Chức Năng: Người Dẫn Dắt</h4>
+                                <p>Mỗi vòng, bí mật rút 1 thẻ "Giải Pháp" và phải dẫn dắt cả lớp tin theo. Nếu bị loại, được chỉ định 1 người nhận 2 phiếu ở vòng sau.</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="card h-80">
+                        <div class="card-inner">
+                            <div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg">
+                                <i class="ph-speaker-slash text-7xl text-sky-600"></i>
+                                <h4 class="text-2xl font-bold mt-4">Lớp Phó Kỷ Luật</h4>
+                                <p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p>
+                            </div>
+                            <div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left">
+                                <h4 class="text-xl font-bold mb-2">Chức Năng: Người Giữ Trật Tự</h4>
+                                <p>Mỗi đêm, chọn 1 người sẽ phải "im lặng" (không được phát biểu) trong phiên tranh luận ngày hôm sau.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card h-80">
+                        <div class="card-inner">
+                            <div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg">
+                                <i class="ph-detective text-7xl text-sky-600"></i>
+                                <h4 class="text-2xl font-bold mt-4">Lớp Phó Học Tập</h4>
+                                <p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p>
+                            </div>
+                            <div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left">
+                                <h4 class="text-xl font-bold mb-2">Chức Năng: Nhà Thông Thái</h4>
+                                <p>Một lần duy nhất, được "soi" để biết vai trò chính xác của 1 người chơi.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card h-80">
+                        <div class="card-inner">
+                            <div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg">
+                                <i class="ph-shield-check text-7xl text-sky-600"></i>
+                                <h4 class="text-2xl font-bold mt-4">Tổ Trưởng</h4>
+                                <p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p>
+                            </div>
+                            <div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left">
+                                <h4 class="text-xl font-bold mb-2">Chức Năng: Người Bảo Vệ</h4>
+                                <p>Mỗi đêm, được chọn bảo vệ 1 người khỏi bị loại hoặc loại bỏ 1 người chơi.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card h-80">
+                        <div class="card-inner">
+                            <div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg">
+                                <i class="ph-user text-7xl text-sky-600"></i>
+                                <h4 class="text-2xl font-bold mt-4">Thành Viên Lớp</h4>
+                                <p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p>
+                            </div>
+                            <div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left">
+                                <h4 class="text-xl font-bold mb-2">Chức Năng: Nền Tảng Của Lớp</h4>
+                                <p>Tham gia tranh luận, phân tích và bỏ phiếu để tìm ra và loại bỏ phe Gây Rối.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <h3 class="text-3xl font-bold text-rose-700 mb-8 font-special">-- Nhóm bạn bí mật (Phe Gây Rối) --</h3>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-center">
+                    <div class="card h-80 lg:col-start-2 lg:col-span-2">
+                         <div class="card-inner">
+                            <div class="card-front bg-rose-100 p-6 flex flex-col justify-center items-center shadow-lg">
+                                <i class="ph-ghost text-7xl text-rose-600"></i>
+                                <h4 class="text-2xl font-bold mt-4">Học Sinh Gây Rối</h4>
+                                <p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p>
+                            </div>
+                            <div class="card-back bg-rose-200 p-6 flex flex-col justify-center text-left">
+                                <h4 class="text-xl font-bold mb-2">Chức Năng: Kẻ Thao Túng</h4>
+                                <p>Biết mặt nhau. Được QT cho biết bản chất giải pháp của Lớp Trưởng để định hướng dư luận ngược lại. Mỗi đêm, cả nhóm thống nhất loại 1 người.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="diem-doc-dao" class="py-16 md:py-24 bg-amber-50 bg-opacity-50">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Không chỉ là nói dối, mà là...</h2>
+                <h3 class="text-5xl md:text-6xl font-bold text-amber-700 mb-8 font-special">Định hướng dư luận</h3>
+                <p class="text-xl max-w-3xl mx-auto mb-12">Điểm khác biệt cốt lõi của KÍNH VẠN HOA nằm ở cơ chế "Giải Pháp". Phe Gây Rối không chỉ bịa chuyện, họ phải thao túng cả lớp dựa trên một sự thật đã biết trước.</p>
+
+                <div class="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-2xl border-2 border-dashed border-amber-600">
+                    <div class="bg-gray-100 p-4 rounded-lg text-left">
+                        <h4 class="font-bold text-xl mb-2 font-special">[THẺ MÂU THUẪN]: Chuyện chỗ ngồi</h4>
+                        <p>Bị các bạn phàn nàn là quá cao, Huy bị thầy chuyển xuống bàn chót. Cậu cảm thấy bị "mất mặt" và ấm ức.</p>
+                    </div>
+                    <div class="my-4 text-2xl font-bold">Lớp trưởng chọn 1 trong 2 giải pháp...</div>
+                    <div class="grid md:grid-cols-2 gap-6 text-left">
+                        <div class="bg-sky-100 border-l-4 border-sky-500 p-4 rounded-r-lg">
+                            <h5 class="font-bold text-sky-800">[GIẢI PHÁP A]</h5>
+                            <p>Một giải pháp mang tính xây dựng, đòi hỏi sự thấu cảm và đoàn kết của cả lớp...</p>
+                            <p class="text-sm italic mt-2 text-sky-700"><strong>Phe gây rối phải:</strong> Tìm cách khiến cả lớp nghi ngờ và phản đối hướng đi này.</p>
+                        </div>
+                        <div class="bg-rose-100 border-l-4 border-rose-500 p-4 rounded-r-lg">
+                            <h5 class="font-bold text-rose-800">[GIẢI PHÁP B]</h5>
+                            <p>Một nước cờ tâm lý cao tay, có vẻ hợp lý nhưng lại gieo rắc sự chia rẽ ngầm...</p>
+                            <p class="text-sm italic mt-2 text-rose-700"><strong>Phe gây rối phải:</strong> Lèo lái dư luận để mọi người tin rằng đây là lựa chọn tốt nhất.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="how-to-play" class="py-16 md:py-24 bg-[#f8f0de]">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl md:text-5xl font-bold mb-16 text-center">Diễn biến một "ngày học"</h2>
+                <div class="max-w-2xl mx-auto">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <i class="ph-clock text-4xl absolute left-[-0.7rem] top-[2.5rem] text-orange-500"></i>
+                        <h3 class="text-3xl font-bold text-orange-700 mb-4">Buổi Sáng: Ra Chơi & Vào Học</h3>
+                        <p class="mb-2"><strong>(1) Ra Mâu Thuẫn:</strong> Quản trò đọc to "Thẻ Mâu Thuẫn" của vòng.</p>
+                        <p class="mb-2"><strong>(2) Nhận Giải Pháp:</strong> Lớp Trưởng dậy nhận "Giải Pháp", phe Gây Rối được thông báo bản chất giải pháp.</p>
+                        <p><strong>(3) Tranh Luận & Bỏ Phiếu:</strong> Cả lớp tranh luận và bỏ phiếu loại người chơi bị nghi ngờ nhất.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                         <i class="ph-moon text-4xl absolute left-[-0.7rem] top-[2.5rem] text-indigo-500"></i>
+                        <h3 class="text-3xl font-bold text-indigo-700 mb-4">Buổi Đêm: Tan Học</h3>
+                        <p class="mb-2"><strong>(4) Hành Động Bí Mật:</strong> Tất cả người chơi úp mặt. Quản trò lần lượt gọi các vai trò đặc biệt dậy để thực hiện chức năng.</p>
+                    </div>
+                     <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <i class="ph-sun text-4xl absolute left-[-0.7rem] top-[2.5rem] text-yellow-500"></i>
+                        <h3 class="text-3xl font-bold text-yellow-700 mb-4">Ngày Học Mới</h3>
+                        <p><strong>(5) Bắt Đầu Vòng Mới:</strong> Quản trò thông báo kết quả đêm qua và một "Ngày Học" mới bắt đầu với mâu thuẫn tiếp theo.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="kich-ban" class="py-16 md:py-24 bg-amber-50 bg-opacity-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl md:text-5xl font-bold mb-12 text-center">Khám phá các kịch bản</h2>
+                <div class="max-w-4xl mx-auto space-y-4">
+                    <div class="accordion-item bg-sky-50 rounded-lg shadow-md overflow-hidden border border-sky-200">
+                        <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-sky-100 transition-colors">
+                            <span class="text-2xl font-bold">Kịch bản: "Bàn Có Năm Chỗ Ngồi"</span>
+                            <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 pt-0 grid md:grid-cols-2 gap-6 items-center">
+                                <img src="https://placehold.co/800x600/3498db/ffffff?text=Kịch+bản+Bàn+có+năm+chỗ+ngồi" alt="Kịch bản 1" class="w-full h-full object-cover rounded-md">
+                                <p>Xoay quanh những mâu thuẫn về chỗ ngồi, bài thơ châm biếm và cả chuyện... tráo đổi cây bạch đàn. Một kịch bản kinh điển về sự ích kỷ và tinh thần tập thể.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-rose-50 rounded-lg shadow-md overflow-hidden border border-rose-200">
+                        <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-rose-100 transition-colors">
+                            <span class="text-2xl font-bold">Kịch bản: "Bắt Đền Hoa Sứ"</span>
+                            <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                        </button>
+                        <div class="accordion-content">
+                             <div class="p-6 pt-0 grid md:grid-cols-2 gap-6 items-center">
+                                <img src="https://placehold.co/800x600/e74c3c/ffffff?text=Kịch+bản+Bắt+đền+hoa+sứ" alt="Kịch bản 2" class="w-full h-full object-cover rounded-md">
+                                <p>Đối mặt với Tắc Kè Bông ngổ ngáo, bạn sẽ chọn can thiệp, đối đầu hay hóa giải xung đột? Kịch bản về lòng dũng cảm, sự khôn ngoan và cách xử lý những kẻ gây hấn.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="gallery" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                 <h2 class="text-4xl md:text-5xl font-bold mb-12 text-center">Thư viện hình ảnh</h2>
+                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="overflow-hidden rounded-lg shadow-lg"><img src="https://placehold.co/600x600/9b59b6/ffffff?text=Hộp+Game" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"></div>
+                    <div class="overflow-hidden rounded-lg shadow-lg"><img src="https://placehold.co/600x600/34495e/ffffff?text=Thẻ+Bài" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"></div>
+                    <div class="overflow-hidden rounded-lg shadow-lg"><img src="https://placehold.co/600x600/1abc9c/ffffff?text=Nhóm+bạn+đang+chơi" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300 col-span-2"></div>
+                    <div class="overflow-hidden rounded-lg shadow-lg"><img src="https://placehold.co/600x600/f1c40f/ffffff?text=Sách+hướng+dẫn" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300 col-span-2"></div>
+                    <div class="overflow-hidden rounded-lg shadow-lg"><img src="https://placehold.co/600x600/e67e22/ffffff?text=Thẻ+Mâu+Thuẫn" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"></div>
+                    <div class="overflow-hidden rounded-lg shadow-lg"><img src="https://placehold.co/600x600/2ecc71/ffffff?text=Không+khí+tranh+luận" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"></div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="dang-ky" class="py-16 md:py-24 bg-amber-50 bg-opacity-50">
+            <div class="container mx-auto px-6 text-center">
+                <img src="https://placehold.co/400x400/8B4513/FFFFFF?text=Hộp+Game+KÍNH+VẠN+HOA" alt="Hộp game Kính Vạn Hoa" class="mx-auto mb-8 rounded-lg shadow-xl">
+                <h2 class="text-3xl md:text-4xl font-bold">Trở thành những người chơi đầu tiên!</h2>
+                <p class="text-xl my-4 max-w-2xl mx-auto">Chúng tôi đang tìm kiếm những người bạn cùng chung đam mê để trải nghiệm và góp ý hoàn thiện "KÍNH VẠN HOA".</p>
+                <button id="open-modal-btn" class="mt-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xl py-4 px-10 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 font-special tracking-wider">
+                    Đăng ký thử nghiệm ngay!
+                </button>
+            </div>
+        </section>
+
+        <section id="testimonials" class="py-16 md:py-24">
+             <div class="container mx-auto px-6">
+                  <h2 class="text-4xl md:text-5xl font-bold mb-12 text-center">Cảm nhận từ người chơi thử</h2>
+                  
+                  <div class="grid md:grid-cols-3 gap-8 text-left">
+                    <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-amber-400">
+                        <p class="italic">"Game siêu cuốn! Cứ tưởng giống Ma Sói nhưng không, cơ chế 'Giải Pháp' làm game sâu sắc hơn hẳn. Cả đám phải vắt óc suy luận chứ không chỉ nói bừa được."</p>
+                        <p class="font-bold text-right mt-4 text-amber-700">- Minh Anh, Sinh viên</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-amber-400">
+                        <p class="italic">"Mình thích nhất là game lồng ghép những câu chuyện quen thuộc. Cảm giác như được sống lại tuổi thơ vậy. Rất hợp để chơi cùng nhóm bạn cũ."</p>
+                        <p class="font-bold text-right mt-4 text-amber-700">- Hoàng Long, Nhân viên văn phòng</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-amber-400">
+                        <p class="italic">"Đây không chỉ là một trò chơi giải trí. Nó thực sự dạy cho bọn trẻ con nhà mình cách thảo luận và lắng nghe người khác. Rất có tính giáo dục!"</p>
+                        <p class="font-bold text-right mt-4 text-amber-700">- Chị Ngọc, Phụ huynh</p>
+                    </div>
+                  </div>
+
+                  <div id="new-testimonials-container" class="grid md:grid-cols-3 gap-8 text-left mt-8">
+                      </div>
+
+                  <div class="max-w-2xl mx-auto mt-16 bg-white p-8 rounded-lg shadow-2xl border-t-4 border-green-500">
+                      <h3 class="text-3xl font-bold text-center mb-6">Gửi cảm nhận của bạn</h3>
+                      <form id="feedback-form">
+                          <div class="mb-4">
+                              <label for="feedback-name" class="block mb-2 font-medium">Tên của bạn:</label>
+                              <input type="text" id="feedback-name" required class="w-full p-3 border border-amber-600 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg" placeholder="Ví dụ: An Nguyễn">
+                          </div>
+                          <div class="mb-6">
+                              <label for="feedback-text" class="block mb-2 font-medium">Cảm nhận của bạn:</label>
+                              <textarea id="feedback-text" rows="4" required class="w-full p-3 border border-amber-600 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg" placeholder="Trò chơi thật tuyệt vời..."></textarea>
+                          </div>
+                          <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 font-special text-xl tracking-wider">Gửi cảm nhận</button>
+                      </form>
+                      <p class="text-center text-sm italic mt-4 text-gray-500">
+                          Lưu ý: Phản hồi của bạn sẽ được hiển thị tạm thời và sẽ biến mất khi tải lại trang.
+                      </p>
+                  </div>
+             </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-800 text-amber-100 py-12">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold font-special text-white">KÍNH VẠN HOA</h2>
+            <p class="mt-2 mb-6">Sống lại ký ức học trò - Mỗi lựa chọn định đoạt một tập thể.</p>
+            <a href="#" class="inline-block bg-white text-stone-800 font-bold py-2 px-6 rounded-lg hover:bg-amber-100 transition-colors mb-6">
+                Tải file luật chơi (PDF)
+            </a>
+            <div class="text-center">
+                 <p class="font-bold">Thông tin liên hệ:</p>
+                 <p>Email: <a href="mailto:contact@boardgamekinhvanhoa.vn" class="hover:underline">contact@boardgamekinhvanhoa.vn</a></p>
+                 <p>Số điện thoại: 0123.456.789</p>
+            </div>
+            <div class="border-t border-stone-600 mt-8 pt-6 text-sm text-stone-400">
+                <p>&copy; 2024 Board Game KÍNH VẠN HOA. All Rights Reserved.</p>
+                <p>Website designed for project demonstration.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <div id="register-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-notebook p-8 rounded-lg shadow-2xl w-full max-w-md relative">
+             <button id="close-modal-btn" class="absolute top-4 right-4 text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+             <h3 class="text-3xl font-bold text-center mb-6 font-special">Đăng ký thử nghiệm</h3>
+             <form id="register-form">
+                <div class="mb-4">
+                    <label for="name" class="block mb-1 font-medium">Họ và Tên:</label>
+                    <input type="text" id="name" name="name" required class="w-full p-2 border border-amber-600 rounded bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg">
+                </div>
+                <div class="mb-4">
+                    <label for="email" class="block mb-1 font-medium">Email:</label>
+                    <input type="email" id="email" name="email" required class="w-full p-2 border border-amber-600 rounded bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg">
+                </div>
+                <div class="mb-6">
+                    <label for="phone" class="block mb-1 font-medium">Số điện thoại:</label>
+                    <input type="tel" id="phone" name="phone" required class="w-full p-2 border border-amber-600 rounded bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg">
+                </div>
+                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 font-special text-xl tracking-wider">Gửi đăng ký</button>
+             </form>
+             <div id="form-success-message" class="hidden text-center mt-4 p-4 bg-green-100 text-green-800 rounded-lg">
+                Cảm ơn bạn đã đăng ký! Chúng tôi sẽ liên hệ với bạn sớm nhất.
+             </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar shadow on scroll
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    navbar.classList.add('shadow-md');
+                } else {
+                    navbar.classList.remove('shadow-md');
+                }
+            });
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Accordion for Scenarios
+            const accordionItems = document.querySelectorAll('.accordion-item');
+
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = item.querySelector('.accordion-icon');
+
+                header.addEventListener('click', () => {
+                    const isOpened = content.style.maxHeight;
+
+                    // Close all items
+                    accordionItems.forEach(otherItem => {
+                        otherItem.querySelector('.accordion-content').style.maxHeight = null;
+                        otherItem.querySelector('.accordion-icon').classList.remove('rotate-180');
+                    });
+
+                    // Open the clicked item if it was closed
+                    if (!isOpened) {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.classList.add('rotate-180');
+                    }
+                });
+            });
+
+
+            // Registration Modal
+            const modal = document.getElementById('register-modal');
+            const openBtn = document.getElementById('open-modal-btn');
+            const closeBtn = document.getElementById('close-modal-btn');
+            const registerForm = document.getElementById('register-form');
+            const successMessage = document.getElementById('form-success-message');
+
+            openBtn.addEventListener('click', () => modal.classList.remove('hidden') & modal.classList.add('flex'));
+            closeBtn.addEventListener('click', () => modal.classList.add('hidden') & modal.classList.remove('flex'));
+
+            // Close modal on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                     modal.classList.add('hidden') & modal.classList.remove('flex');
+                }
+            });
+            
+            // Handle form submission
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                registerForm.classList.add('hidden');
+                successMessage.classList.remove('hidden');
+
+                // Reset form after a delay
+                setTimeout(() => {
+                    modal.classList.add('hidden') & modal.classList.remove('flex');
+                    // Add a small delay for the modal to close before resetting the form
+                    setTimeout(() => {
+                        registerForm.classList.remove('hidden');
+                        successMessage.classList.add('hidden');
+                        registerForm.reset();
+                    }, 500);
+                }, 3000); // Hide modal after 3 seconds
+            });
+
+            // Handle Feedback Form Submission
+            const feedbackForm = document.getElementById('feedback-form');
+            const newTestimonialsContainer = document.getElementById('new-testimonials-container');
+
+            feedbackForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const nameInput = document.getElementById('feedback-name');
+                const feedbackInput = document.getElementById('feedback-text');
+
+                // Sanitize input to prevent HTML injection
+                const name = nameInput.value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const feedback = feedbackInput.value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                if (name === '' || feedback === '') {
+                    alert('Vui lòng nhập đầy đủ tên và cảm nhận của bạn.');
+                    return;
+                }
+
+                const newTestimonialHTML = `
+                    <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-green-400 animate-fade-in">
+                        <p class="italic">"${feedback}"</p>
+                        <p class="font-bold text-right mt-4 text-green-700">- ${name}</p>
+                    </div>
+                `;
+
+                // Add the new testimonial to the top of the container
+                newTestimonialsContainer.insertAdjacentHTML('afterbegin', newTestimonialHTML);
+                
+                // Clear the form
+                feedbackForm.reset();
+            });
+        });
+    </script>
+</body>
+</html>
+
