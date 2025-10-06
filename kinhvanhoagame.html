@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Game KÍNH VẠN HOA - Sống Lại Ký Ức Học Trò</title>
+    <meta name="description" content="Khám phá KÍNH VẠN HOA - board game suy luận xã hội, cẩm nang hóa giải xung đột và nhiều hơn nữa trên trang web đa trang của chúng tôi.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/phosphor-icons"></script>
+
+    <style>
+        /* Custom styles to match the retro theme */
+        body {
+            background-color: #FDF6E3; /* Màu giấy cũ */
+            color: #5a4635; /* Màu chữ nâu đậm hơn */
+            font-family: 'Be Vietnam Pro', sans-serif;
+            font-weight: 400;
+        }
+        h1, h2, h3, h4, .font-special {
+            font-family: 'Playfair Display', serif;
+            color: #8B4513; /* Màu nâu yên ngựa */
+        }
+        .bg-notebook {
+            background-image:
+                linear-gradient(to right, rgba(210, 180, 140, 0.2) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(210, 180, 140, 0.2) 1px, transparent 1px);
+            background-size: 1.5rem 1.5rem;
+            background-color: #FDF6E3;
+        }
+        .hero-bg {
+            background-image: url('https://placehold.co/1920x1080/8B4513/FFFFFF?text=Ảnh+nền+bộ+game+Kính+Vạn+Hoa');
+            background-size: cover;
+            background-position: center;
+        }
+        .card {
+            perspective: 1000px;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .card:hover .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 0.75rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        
+        /* Animation for scroll reveal */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), transform 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .scroll-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Active Nav Link Style */
+        .nav-link.active-nav {
+             color: #D97706; /* amber-600 */
+             font-weight: 600;
+        }
+
+        /* Page transition animation */
+        @keyframes fadeInPage {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-page-fade-in {
+            animation: fadeInPage 0.4s ease-in-out forwards;
+        }
+
+        /* Handbook specific styles */
+        .handbook-content h3 { font-size: 1.875rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
+        .handbook-content h4 { font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .handbook-content p { margin-bottom: 1rem; line-height: 1.75; }
+        .handbook-content ul { list-style-type: disc; padding-left: 2rem; margin-bottom: 1rem; }
+        .case-study-box { background-color: #FEF3C7; border-left: 4px solid #F59E0B; padding: 1rem; margin: 1.5rem 0; border-radius: 0 0.5rem 0.5rem 0; }
+        .quiz-option { cursor: pointer; transition: background-color 0.2s; }
+    </style>
+</head>
+
+<body class="bg-notebook">
+
+    <!-- Header & Navbar -->
+    <header id="navbar" class="bg-[#FDF6E3] bg-opacity-80 backdrop-blur-sm sticky top-0 z-50 transition-shadow duration-300">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" data-page="home" class="text-3xl text-amber-800 font-bold font-special nav-link">Kính Vạn Hoa</a>
+            <nav class="hidden lg:flex items-center space-x-6 text-lg font-medium">
+                <a href="#" data-page="home" class="nav-link hover:text-orange-600 transition-colors active-nav">Trang chủ</a>
+                <a href="#" data-page="rules" class="nav-link hover:text-orange-600 transition-colors">Luật chơi & Vai trò</a>
+                <a href="#" data-page="handbook" class="nav-link hover:text-orange-600 transition-colors">Cẩm nang</a>
+                <a href="#" data-page="playtest" class="nav-link hover:text-orange-600 transition-colors">Thử nghiệm</a>
+            </nav>
+            <button id="mobile-menu-button" class="lg:hidden">
+                <i class="ph-list text-3xl"></i>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden px-6 pb-4 flex flex-col space-y-3">
+            <a href="#" data-page="home" class="nav-link hover:text-orange-600 transition-colors text-lg active-nav">Trang chủ</a>
+            <a href="#" data-page="rules" class="nav-link hover:text-orange-600 transition-colors text-lg">Luật chơi & Vai trò</a>
+            <a href="#" data-page="handbook" class="nav-link hover:text-orange-600 transition-colors text-lg">Cẩm nang</a>
+            <a href="#" data-page="playtest" class="nav-link hover:text-orange-600 transition-colors text-lg">Thử nghiệm</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- PAGE 1: HOME -->
+        <div id="page-home">
+            <section class="h-screen min-h-[700px] hero-bg flex items-center justify-center relative">
+                <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+                <div class="relative text-center text-white p-6">
+                    <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-wider text-white whitespace-nowrap" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">KÍNH VẠN HOA</h1>
+                    <p class="mt-4 text-2xl md:text-3xl max-w-4xl mx-auto font-special" style="text-shadow: 2px 2px 6px rgba(0,0,0,0.9); color: #FFDE59;">"Khi niềm tin trong lớp học bị thử thách, <br class="hidden md:block"> bạn là người hòa giải hay kẻ phá hoại?"</p>
+                </div>
+            </section>
+            <section id="gioi-thieu" class="py-16 md:py-24">
+                <div class="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+                    <div class="text-center md:text-left">
+                        <h2 class="text-4xl md:text-5xl font-bold mb-6">Câu chuyện của "KÍNH VẠN HOA"</h2>
+                        <div class="text-lg leading-relaxed space-y-4">
+                            <p>Bạn còn nhớ những câu chuyện về tuổi học trò của tác giả Nguyễn Nhật Ánh? Board game KÍNH VẠN HOA sẽ đưa bạn trở lại chính những ký ức đó, nhưng lần này, bạn là người quyết định diễn biến câu chuyện.</p>
+                             <p class="font-medium">Trò chơi không chỉ là cuộc đấu trí giữa các phe, mà còn là hành trình khám phá và rèn luyện kỹ năng giải quyết mâu thuẫn, thấu cảm và giao tiếp - những bài học quý giá cho lứa tuổi học sinh.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <img src="1.jpg" alt="Bìa sách Kính Vạn Hoa" class="rounded-lg shadow-2xl mx-auto transform md:rotate-3 transition hover:rotate-0 hover:scale-105">
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE 2: RULES & ROLES -->
+        <div id="page-rules" class="hidden">
+            <section id="luat-choi" class="py-16 md:py-24">
+                <div class="container mx-auto px-6 text-center">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-12">Luật chơi & Mục tiêu</h2>
+                    <div class="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto mb-16">
+                        <div class="bg-white p-8 rounded-lg shadow-lg border-2 border-dashed border-sky-400"><i class="ph-users-three text-6xl text-sky-500 mx-auto"></i><h3 class="text-3xl font-bold my-4 text-sky-700">Phe Hòa Đồng</h3><p class="text-lg">"Tìm và loại bỏ tất cả Học Sinh Gây Rối để bảo vệ sự đoàn kết của lớp học."</p></div>
+                        <div class="bg-white p-8 rounded-lg shadow-lg border-2 border-dashed border-rose-400"><i class="ph-smiley-wink text-6xl text-rose-500 mx-auto"></i><h3 class="text-3xl font-bold my-4 text-rose-700">Phe Gây Rối</h3><p class="text-lg">"Thao túng, chia rẽ và loại bỏ dần phe Hòa Đồng cho đến khi chiếm đa số."</p></div>
+                    </div>
+                </div>
+            </section>
+            <section id="vai-tro-chi-tiet" class="py-16 md:py-24 bg-amber-50 bg-opacity-50">
+                <div class="container mx-auto px-6 text-center">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">Các vai trò trong lớp</h2>
+                    <p class="text-xl max-w-3xl mx-auto mb-12">Mỗi người chơi sẽ nhận một vai trò bí mật. Hãy khám phá chức năng đặc biệt của từng thành viên trong lớp học này!</p>
+                    <h3 class="text-3xl font-bold text-sky-700 mb-8 font-special">-- Ban cán sự lớp (Phe Hòa Đồng) --</h3>
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-16">
+                        <div class="card h-80"><div class="card-inner"><div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg"><i class="ph-star text-7xl text-sky-600"></i><h4 class="text-2xl font-bold mt-4">Lớp Trưởng</h4><p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p></div><div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left"><h4 class="text-xl font-bold mb-2">Chức Năng: Người Dẫn Dắt</h4><p>Mỗi vòng, bí mật rút 1 thẻ "Giải Pháp" và phải dẫn dắt cả lớp tin theo. Nếu bị loại, được chỉ định 1 người nhận 2 phiếu ở vòng sau.</p></div></div></div>
+                        <div class="card h-80"><div class="card-inner"><div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg"><i class="ph-speaker-slash text-7xl text-sky-600"></i><h4 class="text-2xl font-bold mt-4">Lớp Phó Kỷ Luật</h4><p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p></div><div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left"><h4 class="text-xl font-bold mb-2">Chức Năng: Người Giữ Trật Tự</h4><p>Mỗi đêm, chọn 1 người sẽ phải "im lặng" trong phiên tranh luận ngày hôm sau.</p></div></div></div>
+                        <div class="card h-80"><div class="card-inner"><div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg"><i class="ph-detective text-7xl text-sky-600"></i><h4 class="text-2xl font-bold mt-4">Lớp Phó Học Tập</h4><p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p></div><div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left"><h4 class="text-xl font-bold mb-2">Chức Năng: Nhà Thông Thái</h4><p>Một lần duy nhất, được "soi" để biết vai trò chính xác của 1 người chơi.</p></div></div></div>
+                        <div class="card h-80"><div class="card-inner"><div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg"><i class="ph-shield-check text-7xl text-sky-600"></i><h4 class="text-2xl font-bold mt-4">Tổ Trưởng</h4><p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p></div><div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left"><h4 class="text-xl font-bold mb-2">Chức Năng: Người Bảo Vệ</h4><p>Mỗi đêm, được chọn bảo vệ 1 người hoặc loại bỏ 1 người chơi.</p></div></div></div>
+                        <div class="card h-80"><div class="card-inner"><div class="card-front bg-sky-100 p-6 flex flex-col justify-center items-center shadow-lg"><i class="ph-user text-7xl text-sky-600"></i><h4 class="text-2xl font-bold mt-4">Thành Viên Lớp</h4><p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p></div><div class="card-back bg-sky-200 p-6 flex flex-col justify-center text-left"><h4 class="text-xl font-bold mb-2">Chức Năng: Nền Tảng Của Lớp</h4><p>Tham gia tranh luận, phân tích và bỏ phiếu để tìm ra và loại bỏ phe Gây Rối.</p></div></div></div>
+                    </div>
+                    <h3 class="text-3xl font-bold text-rose-700 mb-8 font-special">-- Nhóm bạn bí mật (Phe Gây Rối) --</h3>
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-center">
+                        <div class="card h-80 lg:col-start-2 lg:col-span-2"><div class="card-inner"><div class="card-front bg-rose-100 p-6 flex flex-col justify-center items-center shadow-lg"><i class="ph-ghost text-7xl text-rose-600"></i><h4 class="text-2xl font-bold mt-4">Học Sinh Gây Rối</h4><p class="mt-2 text-sm italic">(Rê chuột vào để xem)</p></div><div class="card-back bg-rose-200 p-6 flex flex-col justify-center text-left"><h4 class="text-xl font-bold mb-2">Chức Năng: Kẻ Thao Túng</h4><p>Biết mặt nhau. Được QT cho biết bản chất giải pháp để định hướng dư luận ngược lại. Mỗi đêm, cả nhóm thống nhất loại 1 người.</p></div></div></div>
+                    </div>
+                </div>
+            </section>
+            <!-- NEW SCENARIOS SECTION -->
+            <section id="kich-ban" class="py-16 md:py-24">
+                <div class="container mx-auto px-6">
+                     <div class="text-center mb-16">
+                        <h2 class="text-4xl md:text-5xl font-bold">Khám phá các kịch bản</h2>
+                        <p class="text-xl max-w-3xl mx-auto mt-4">Mỗi ván chơi là một câu chuyện mới. Khám phá những tình huống éo le, những lựa chọn khó khăn được lấy cảm hứng từ các tác phẩm kinh điển.</p>
+                    </div>
+                    <div class="max-w-4xl mx-auto space-y-4 accordion-container">
+                        <!-- Scenario 1 -->
+                        <div class="accordion-item bg-sky-50 rounded-lg shadow-md overflow-hidden border border-sky-200">
+                            <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-sky-100 transition-colors">
+                                <span class="text-2xl font-bold">Kịch bản 1: Bàn có năm chỗ ngồi</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-sky-200 grid md:grid-cols-2 gap-6 items-center">
+                                    <img src="2.jpg" alt="Kịch bản Bàn có năm chỗ ngồi" class="w-full h-full object-cover rounded-md">
+                                    <p>Đối mặt với những mâu thuẫn kinh điển về chỗ ngồi, bài thơ châm biếm và cả chuyện... tráo đổi cây bạch đàn. Liệu bạn sẽ chọn sự thật để bảo vệ lẽ phải, hay hy sinh một cá nhân để bảo vệ thành tích cho cả tổ?</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Scenario 2 -->
+                        <div class="accordion-item bg-rose-50 rounded-lg shadow-md overflow-hidden border border-rose-200">
+                            <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-rose-100 transition-colors">
+                                <span class="text-2xl font-bold">Kịch bản 2: Bắt đền hoa sứ</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-rose-200 grid md:grid-cols-2 gap-6 items-center">
+                                     <img src="3.jpg" alt="Kịch bản Bắt đền hoa sứ" class="w-full h-full object-cover rounded-md">
+                                     <p>Khi Tắc Kè Bông ngổ ngáo liên tục gây hấn, bạn sẽ chọn can thiệp bằng trí tuệ, đối đầu bằng sức mạnh hay hóa giải xung đột bằng sự vị tha? Mỗi lựa chọn sẽ quyết định mối quan hệ huynh đệ trong gia đình.</p>
+                                </div>
+                            </div>
+                        </div>
+                                     <p>Đối mặt với trò đùa chấm điể                        <!-- Scenario 3 -->
+                        <div class="accordion-item bg-green-50 rounded-lg shadow-md overflow-hidden border border-green-200">
+                            <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-green-100 transition-colors">
+                                <span class="text-2xl font-bold">Kịch bản 3: Ông thầy nóng tính</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-green-200 grid md:grid-cols-2 gap-6 items-center">
+                                     <img src="4.jpg" alt="Kịch bản Ông thầy nóng tính" class="w-full h-full object-cover rounded-md">
+                                     <p>Từ một câu trả lời "bá đạo" trong lớp đến việc đối mặt với "thầy dạy kèm" hay la hét. Kịch bản này thử thách lòng trung thực, sự dũng cảm đối mặt sai lầm và sự khéo léo khi công nhận công lao của bạn bè.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Scenario 4 -->
+                        <div class="accordion-item bg-purple-50 rounded-lg shadow-md overflow-hidden border border-purple-200">
+                            <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-purple-100 transition-colors">
+                                <span class="text-2xl font-bold">Kịch bản 4: Người bạn lạ lùng</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-purple-200 grid md:grid-cols-2 gap-6 items-center">
+                                     <img src="5.jpg" alt="Kịch bản Người bạn lạ lùng" class="w-full h-full object-cover rounded-md">
+                                     <p>Một người bạn bị lộ bí mật giới tính, một trận chiến không cân sức. Bạn sẽ chọn bảo vệ bạn mình bằng mọi giá hay trao cho họ cơ hội tự khẳng định bản thân? Tình bạn đích thực đôi khi là sự chấp nhận vô điều kiện.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Scenario 5 -->
+                         <div class="accordion-item bg-yellow-50 rounded-lg shadow-md overflow-hidden border border-yellow-200">
+                            <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-yellow-100 transition-colors">
+                                <span class="text-2xl font-bold">Kịch bản 5: Ngôi trường mọi khi</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-yellow-200 grid md:grid-cols-2 gap-6 items-center">
+                                     <img src="6.jpg" alt="Kịch bản Ngôi trường mọi khi" class="w-full h-full object-cover rounded-md">
+m ngoại hình, một tình bạn thân đang nhạt dần, và làm thế nào để giúp đỡ một người bạn khó khăn mà không làm tổn thương lòng tự trọng của họ? Những lựa chọn tinh tế sẽ quyết định tất cả.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE 3: HANDBOOK -->
+        <div id="page-handbook" class="hidden">
+            <section id="cam-nang" class="py-16 md:py-24">
+                <div class="container mx-auto px-6">
+                     <div class="text-center mb-16">
+                        <h2 class="text-4xl md:text-5xl font-bold">Cẩm nang hóa giải xung đột học đường</h2>
+                        <p class="text-xl max-w-3xl mx-auto mt-4">Một công cụ toàn diện để xây dựng môi trường học đường tôn trọng và thấu hiểu.</p>
+                    </div>
+                    <div class="max-w-4xl mx-auto space-y-4 accordion-container">
+                        <!-- Accordion Item 1 -->
+                        <div class="accordion-item bg-white rounded-lg shadow-md overflow-hidden border border-amber-200">
+                            <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-amber-50 transition-colors">
+                                <span class="text-2xl font-bold">Phần I: Giải mã mâu thuẫn học đường</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-amber-200">
+                                    <p>Môi trường học đường, nơi ươm mầm tri thức và nhân cách, không phải lúc nào cũng bình yên. Những mâu thuẫn, xung đột là một phần không thể tránh khỏi trong quá trình tương tác và trưởng thành của học sinh. Tuy nhiên, việc hiểu đúng bản chất, nhận diện chính xác nguyên nhân và thấy rõ hậu quả của những xung đột này là bước đi tiên quyết để xây dựng một văn hóa học đường an toàn, lành mạnh và tôn trọng. Phần này sẽ cung cấp một cái nhìn toàn cảnh, giúp giải mã hiện tượng phức tạp mang tên "mâu thuẫn học đường".</p>
+                                    <h4>1.1. Mâu thuẫn học đường là gì? Vượt lên trên những trận cãi vã</h4>
+                                    <p>Về cơ bản, xung đột học đường được định nghĩa là những mâu thuẫn, tranh chấp, hay bất đồng quan điểm xảy ra giữa các cá nhân hoặc nhóm học sinh trong bối cảnh trường học. Tuy nhiên, định nghĩa này chỉ là bề nổi. Thực chất, mâu thuẫn tồn tại trên một phổ rộng, từ những xích mích nhỏ nhặt hàng ngày như tranh cãi hay ganh đua trong học tập, cho đến các hình thức nghiêm trọng hơn, leo thang thành bạo lực học đường.</p>
+                                    <p>Hành vi bạo lực thường là đỉnh của tảng băng chìm. Do đó, cần phải nhận diện rõ các hình thái của bạo lực học đường để có biện pháp can thiệp phù hợp:</p>
+                                    <ul>
+                                        <li><strong>Bạo lực thể chất:</strong> Đánh đập, xô xát, hành hạ, hoặc cố ý gây thương tích cho người khác, đôi khi có sử dụng vũ khí.</li>
+                                        <li><strong>Bạo lực tinh thần/tâm lý:</strong> Tấn công bằng lời nói, lăng mạ, miệt thị, đe dọa, sỉ nhục nhằm gây tổn thương tâm lý. Một dạng đặc biệt nguy hiểm là "bạo lực lạnh" (cold violence) – hành vi một nhóm học sinh giữ im lặng, không giao tiếp và cố tình cô lập một bạn khác.</li>
+                                        <li><strong>Bạo lực vật chất:</strong> Cố ý phá hoại, làm hỏng hoặc chiếm đoạt tài sản, sách vở, đồ dùng cá nhân của bạn học.</li>
+                                        <li><strong>Bạo lực tình dục:</strong> Quấy rối, tấn công tình dục, hiếp dâm hoặc dùng tình dục để đe dọa.</li>
+                                    </ul>
+                                    <h4>1.2. Giải mã nguồn cơn: Tại sao mâu thuẫn nảy sinh?</h4>
+                                    <p>Mâu thuẫn học đường không bắt nguồn từ một nguyên nhân đơn lẻ mà là kết quả của sự tương tác phức tạp giữa nhiều yếu tố từ cá nhân, gia đình, học đường và xã hội.</p>
+                                    <ul>
+                                        <li><strong>Từ bên trong học sinh:</strong> Tâm lý lứa tuổi dậy thì bất ổn, thiếu hụt kỹ năng sống (giao tiếp, giải quyết vấn đề, quản lý cảm xúc).</li>
+                                        <li><strong>Từ môi trường gia đình:</strong> Thiếu sự quan tâm của cha mẹ, chứng kiến hoặc trải qua bạo lực gia đình, sự "cô đơn kết nối" trong thời đại số.</li>
+                                        <li><strong>Từ môi trường học đường:</strong> Biện pháp kỷ luật chưa hiệu quả, áp lực học tập và cạnh tranh không lành mạnh.</li>
+                                        <li><strong>Từ môi trường xã hội:</strong> Ảnh hưởng từ văn hóa bạo lực trên game, phim ảnh, mạng xã hội và sự vô cảm của cộng đồng.</li>
+                                    </ul>
+                                    <h4>1.3. Hậu quả nặng nề: Những vết sẹo vô hình và hữu hình</h4>
+                                    <p>Mâu thuẫn học đường để lại hậu quả nặng nề cho tất cả các bên liên quan.</p>
+                                    <ul>
+                                        <li><strong>Đối với nạn nhân:</strong> Tổn thương tâm lý nghiêm trọng (tự ti, lo lắng, trầm cảm), kết quả học tập sa sút, có những biểu hiện bất thường về hành vi và sức khỏe.</li>
+                                        <li><strong>Đối với người gây ra mâu thuẫn:</strong> Phát triển nhân cách lệch lạc, hung hăng, có nguy cơ vi phạm pháp luật trong tương lai.</li>
+                                        <li><strong>Đối với môi trường học đường:</strong> Tạo ra không khí sợ hãi, căng thẳng, làm xói mòn niềm tin của phụ huynh vào nhà trường.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Item 2 -->
+                        <div class="accordion-item bg-white rounded-lg shadow-md overflow-hidden border border-amber-200">
+                            <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-amber-50 transition-colors">
+                                <span class="text-2xl font-bold">Phần II: Bộ công cụ vàng - Rèn luyện kỹ năng</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-amber-200">
+                                    <p>Giải quyết mâu thuẫn không phải là một năng khiếu bẩm sinh mà là một tập hợp các kỹ năng có thể học hỏi và rèn luyện. Việc trang bị cho học sinh "bộ công cụ vàng" này là nền tảng vững chắc cho sự thành công trong các mối quan hệ và cuộc sống sau này.</p>
+                                    <h4>2.1. Nền tảng của sự bình tĩnh: Kỹ năng nhận diện và quản lý cảm xúc</h4>
+                                    <p>Bình tĩnh là nguyên tắc vàng quan trọng nhất. Việc kiểm soát được cảm xúc là chìa khóa để giữ một cái đầu lạnh, từ đó đưa ra những quyết định sáng suốt.</p>
+                                    <p><strong>Các kỹ thuật thực hành:</strong></p>
+                                    <ul>
+                                        <li><strong>Gọi tên cảm xúc:</strong> Dừng lại và tự hỏi: "Mình đang cảm thấy gì lúc này?".</li>
+                                        <li><strong>Công cụ "hạ nhiệt" tức thì:</strong> Hít thở sâu và chậm, đếm thầm từ 1 đến 10, tạm thời rời khỏi nơi xảy ra xung đột.</li>
+                                        <li><strong>Viết nhật ký cảm xúc:</strong> Viết ra những suy nghĩ và cảm xúc để tự phản ánh và hiểu rõ bản thân.</li>
+                                    </ul>
+                                     <div class="case-study-box"><p class="font-bold">Câu hỏi nhanh:</p><p>Khi một mâu thuẫn bắt đầu nảy sinh, hành động nào nên được ưu tiên hàng đầu?</p><div class="mt-2 space-y-2 quiz-container"><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">A. Ngay lập tức tìm người lớn để giải quyết.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">B. Cố gắng chứng minh mình đúng.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200" data-correct="true">C. Giữ bình tĩnh và tạm dừng lại.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">D. Bỏ đi và không nói gì.</button><p class="quiz-feedback hidden mt-2 p-2 rounded"></p></div></div>
+                                    <h4>2.2. Nghệ thuật lắng nghe thấu cảm: Chìa khóa mở cửa trái tim</h4>
+                                    <p>Phần lớn các mâu thuẫn bắt nguồn từ sự hiểu lầm. Lắng nghe tích cực (Active Listening) là nỗ lực có ý thức để tiếp nhận, thấu hiểu và diễn giải toàn bộ thông điệp mà người nói đang truyền đạt.</p>
+                                    <p><strong>Các bước rèn luyện:</strong></p>
+                                    <ul>
+                                        <li><strong>Tập trung hoàn toàn:</strong> Dành toàn bộ sự chú ý cho người nói, duy trì giao tiếp bằng mắt.</li>
+                                        <li><strong>Không ngắt lời, không phán xét:</strong> Hãy để đối phương nói hết ý của họ.</li>
+                                        <li><strong>Quan sát ngôn ngữ cơ thể:</strong> Chú ý đến các tín hiệu phi ngôn ngữ như nét mặt, cử chỉ, tư thế.</li>
+                                        <li><strong>Đặt câu hỏi để làm rõ:</strong> Sử dụng các câu hỏi mở để khuyến khích đối phương chia sẻ nhiều hơn.</li>
+                                        <li><strong>Phản hồi và diễn giải lại (Paraphrasing):</strong> Tóm tắt lại những gì bạn hiểu bằng lời của mình để xác nhận thông tin.</li>
+                                    </ul>
+                                    <div class="case-study-box"><p class="font-bold">Câu hỏi nhanh:</p><p>Theo bạn, kỹ năng nào là quan trọng nhất để bắt đầu giải quyết một mâu thuẫn?</p><div class="mt-2 space-y-2 quiz-container"><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">A. Kỹ năng trình bày quan điểm của mình một cách thuyết phục.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200" data-correct="true">B. Kỹ năng lắng nghe tích cực để thấu hiểu đối phương.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">C. Kỹ năng tìm ra lỗi sai của người khác.</button><p class="quiz-feedback hidden mt-2 p-2 rounded"></p></div></div>
+                                    <h4>2.3. Sức mạnh của lời nói xây dựng: Giao tiếp phi bạo lực</h4>
+                                    <p>Nguyên tắc cốt lõi là tập trung vào vấn đề cần giải quyết, chứ không công kích cá nhân. Một mô hình hiệu quả là sử dụng "ngôi tôi": "Tôi cảm thấy... (cảm xúc) khi bạn... (hành vi cụ thể) bởi vì... (lý do/suy nghĩ của bạn)."</p>
+                                    <h4>2.4. Tư duy "cùng thắng" (win-win): Đàm phán và hợp tác</h4>
+                                    <p>Mục tiêu cuối cùng là tìm ra một giải pháp "cùng thắng" (Win-Win), nơi tất cả các bên liên quan đều cảm thấy hài lòng. Các bước cơ bản: chuẩn bị, trao đổi thông tin, đề xuất giải pháp, và thỏa thuận.</p>
+                                    <div class="case-study-box"><p class="font-bold">Câu hỏi nhanh:</p><p>Mục tiêu của việc đàm phán theo tư duy "Cùng Thắng" (Win-Win) là gì?</p><div class="mt-2 space-y-2 quiz-container"><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">A. Tìm ra ai là người có lỗi.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200" data-correct="true">B. Đạt được một giải pháp mà tất cả các bên đều cảm thấy hài lòng.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">C. Để một bên nhượng bộ hoàn toàn.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">D. Chứng tỏ quan điểm của mình là vượt trội.</button><p class="quiz-feedback hidden mt-2 p-2 rounded"></p></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Item 3 -->
+                        <div class="accordion-item bg-white rounded-lg shadow-md overflow-hidden border border-amber-200">
+                            <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-amber-50 transition-colors">
+                                <span class="text-2xl font-bold">Phần III: Lộ trình hành động - 5 bước vượt bão mâu thuẫn</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-amber-200">
+                                    <p>Đây là lộ trình cụ thể giúp học sinh điều hướng qua "cơn bão" mâu thuẫn một cách an toàn và xây dựng.</p>
+                                    <div class="space-y-8 mt-8">
+                                        <div class="flex items-start gap-6"><div class="flex-shrink-0 bg-red-100 text-red-600 rounded-full p-3"><i class="ph-timer text-4xl"></i></div><div><h4 class="text-2xl mt-0">Bước 1: Tạm dừng - "Đóng băng" cơn giận</h4><p>Hành động: Ngay khi cảm thấy căng thẳng và tức giận, hãy dừng lại. Không nói, không hành động. Hít một hơi thật sâu. Nếu cần, hãy rời khỏi nơi đó một chút. <br>Mục đích: Tạo "thời gian đình chiến", ngăn chặn những hành động bột phát gây tổn thương.</p></div></div>
+                                        <div class="flex items-start gap-6"><div class="flex-shrink-0 bg-blue-100 text-blue-600 rounded-full p-3"><i class="ph-ear text-4xl"></i></div><div><h4 class="text-2xl mt-0">Bước 2: Lắng nghe - Đeo đôi tai của bạn mình</h4><p>Hành động: Sau khi đã bình tĩnh, tìm không gian riêng để nói chuyện. Mỗi người có một khoảng thời gian để trình bày mà không bị ngắt lời. Người còn lại có nhiệm vụ lắng nghe để thực sự hiểu. <br>Mục đích: Thay đổi góc nhìn từ "tôi chống lại bạn" sang "tôi muốn hiểu bạn", làm sáng tỏ những hiểu lầm.</p></div></div>
+                                        <div class="flex items-start gap-6"><div class="flex-shrink-0 bg-green-100 text-green-600 rounded-full p-3"><i class="ph-chats-teardrop text-4xl"></i></div><div><h4 class="text-2xl mt-0">Bước 3: Bày tỏ - Nói ra cảm xúc của mình một cách ôn hòa</h4><p>Hành động: Khi đến lượt, hãy dùng cấu trúc "Tớ cảm thấy...". Ví dụ: "Tớ cảm thấy rất buồn khi cậu kể bí mật của tớ cho người khác, bởi vì tớ đã rất tin tưởng cậu." <br>Mục đích: Diễn đạt cảm xúc trung thực nhưng không đổ lỗi, giúp bạn của bạn hiểu được tác động từ hành động của họ.</p></div></div>
+                                        <div class="flex items-start gap-6"><div class="flex-shrink-0 bg-yellow-100 text-yellow-600 rounded-full p-3"><i class="ph-puzzle-piece text-4xl"></i></div><div><h4 class="text-2xl mt-0">Bước 4: Cùng tìm giải pháp - Hợp sức tìm lối ra</h4><p>Hành động: Cùng nhau viết ra tất cả các cách có thể để giải quyết vấn đề, không phán xét. Sau đó, chọn ra giải pháp mà cả hai đều cảm thấy công bằng. <br>Mục đích: Chuyển từ thế đối đầu sang thế hợp tác ("chúng ta cùng nhau giải quyết vấn đề này").</p></div></div>
+                                        <div class="flex items-start gap-6"><div class="flex-shrink-0 bg-purple-100 text-purple-600 rounded-full p-3"><i class="ph-handshake text-4xl"></i></div><div><h4 class="text-2xl mt-0">Bước 5: Cam kết và tha thứ - Cùng nhau bước tiếp</h4><p>Hành động: Cùng thống nhất các bước thực hiện và cam kết tuân thủ. Hãy sẵn sàng nói lời xin lỗi một cách chân thành và học cách tha thứ cho lỗi lầm của bạn mình. <br>Mục đích: Hàn gắn và củng cố mối quan hệ. Tha thứ không phải là quên đi, mà là quyết định rằng tình bạn quan trọng hơn mâu thuẫn đó.</p></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Item 4 -->
+                        <div class="accordion-item bg-white rounded-lg shadow-md overflow-hidden border border-amber-200">
+                             <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-amber-50 transition-colors">
+                                <span class="text-2xl font-bold">Phần IV: Hệ sinh thái hỗ trợ</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-amber-200">
+                                    <p>Việc giải quyết mâu thuẫn học đường không phải là trách nhiệm của riêng học sinh. Để thành công, cần có sự vào cuộc đồng bộ và phối hợp chặt chẽ của cả một hệ sinh thái hỗ trợ, bao gồm chính các em học sinh, gia đình, nhà trường và cộng đồng. Mỗi thành phần trong hệ sinh thái này đều có một vai trò và những hành động cụ thể cần thực hiện để góp phần kiến tạo một môi trường học đường hòa bình.</p>
+                                    <h4>4.1. Cẩm nang dành cho học sinh: Bạn không đơn độc</h4>
+                                    <ul>
+                                        <li><strong>Tự bảo vệ bản thân:</strong> Học sinh cần được trang bị các kỹ năng để tự bảo vệ mình trước những hành vi tiêu cực. Đôi khi, việc phản ứng một cách bình tĩnh nhưng dứt khoát như nhìn thẳng vào người trêu chọc và nói "Dừng lại đi", hoặc đơn giản là bỏ đi một cách tự tin cũng có thể dập tắt mâu thuẫn ngay từ đầu.</li>
+                                        <li><strong>Biết khi nào cần tìm sự giúp đỡ:</strong> Tự giải quyết là tốt, nhưng học sinh cũng cần biết giới hạn của mình. Nếu mâu thuẫn leo thang thành bắt nạt, đe dọa, hoặc khi cảm thấy quá sức và không an toàn, việc tìm kiếm sự giúp đỡ từ một người lớn đáng tin cậy (giáo viên chủ nhiệm, cha mẹ, nhân viên tư vấn tâm lý) là một hành động dũng cảm và thông minh. Trong những trường hợp này, im lặng không phải là vàng, mà có thể khiến tình hình trở nên tồi tệ hơn.</li>
+                                        <li><strong>Trở thành người hỗ trợ tích cực (Upstander):</strong> Thay vì là một người ngoài cuộc (bystander) thờ ơ, học sinh có thể đóng vai trò tích cực trong việc xây dựng văn hóa học đường. Điều này có nghĩa là không tham gia vào các hành vi bắt nạt, không cổ vũ, và quan trọng nhất là dám lên tiếng bảo vệ bạn bè khi chứng kiến sai trái. Nếu không thể can thiệp trực tiếp, việc báo cáo cho giáo viên cũng là một hành động có trách nhiệm.</li>
+                                    </ul>
+                                    <div class="case-study-box"><p class="font-bold">Câu hỏi nhanh:</p><p>Khi chứng kiến một bạn khác bị bắt nạt, một học sinh nên làm gì để trở thành "người hỗ trợ tích cực"?</p><div class="mt-2 space-y-2 quiz-container"><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">A. Quay video và đăng lên mạng xã hội.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">B. Đứng xem và không can thiệp để tránh rắc rối.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200" data-correct="true">C. Lên tiếng bảo vệ bạn hoặc báo cho người lớn đáng tin cậy.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">D. Cổ vũ cho hành vi bắt nạt.</button><p class="quiz-feedback hidden mt-2 p-2 rounded"></p></div></div>
+                                    <h4>4.2. Cẩm nang dành cho phụ huynh: Đồng hành cùng con vượt qua khó khăn</h4>
+                                    <ul>
+                                        <li><strong>Lắng nghe và thấu cảm, không đổ lỗi:</strong> Khi con chia sẻ về mâu thuẫn ở trường, phản ứng đầu tiên của cha mẹ nên là lắng nghe một cách chân thành và công nhận cảm xúc của con ("Mẹ hiểu là con đã rất buồn/tức giận khi chuyện đó xảy ra"). Tuyệt đối tránh việc vội vàng phán xét, trách mắng hay đổ lỗi cho con, vì điều này sẽ khiến trẻ đóng cửa trái tim mình lại.</li>
+                                        <li><strong>Dạy con kỹ năng, không dạy con trả thù:</strong> Thay vì khuyên con "đánh lại bạn đi", cha mẹ nên hướng dẫn con các cách giải quyết ôn hòa và xây dựng. Việc dạy con trả đũa bằng bạo lực không chỉ khiến mâu thuẫn leo thang mà còn vô tình gieo vào đầu trẻ một thông điệp sai lầm rằng sức mạnh thể chất quan trọng hơn lẽ phải.</li>
+                                        <li><strong>Làm gương trong chính gia đình:</strong> Trẻ em học hỏi từ việc quan sát. Cách cha mẹ giải quyết xung đột với nhau và với những người khác chính là bài học trực quan nhất cho con cái. Vì vậy, cha mẹ cần thống nhất trong phương pháp giáo dục và giải quyết bất đồng của chính mình một cách văn minh, tránh cãi vã to tiếng trước mặt con.</li>
+                                        <li><strong>Phối hợp chặt chẽ với nhà trường:</strong> Khi phát hiện con gặp vấn đề nghiêm trọng, hành động khôn ngoan nhất là liên hệ với giáo viên chủ nhiệm để trao đổi thông tin và phối hợp tìm giải pháp. Cha mẹ nên tránh hành động nóng vội như tự mình đến trường tìm gặp học sinh kia hoặc phụ huynh của em đó, vì điều này có thể làm phức tạp thêm tình hình.</li>
+                                    </ul>
+                                    <div class="case-study-box"><p class="font-bold">Câu hỏi nhanh:</p><p>Khi con kể về việc bị bạn bắt nạt, hành động nào của phụ huynh được cho là KHÔNG nên làm?</p><div class="mt-2 space-y-2 quiz-container"><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">A. Lắng nghe và công nhận cảm xúc của con.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">B. Phối hợp với giáo viên chủ nhiệm.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200" data-correct="true">C. Dạy con cách trả đũa bằng bạo lực.</button><button class="quiz-option w-full text-left p-2 bg-white rounded hover:bg-gray-200">D. Hướng dẫn con các kỹ năng giải quyết vấn đề.</button><p class="quiz-feedback hidden mt-2 p-2 rounded"></p></div></div>
+                                    <h4>4.3. Cẩm nang dành cho nhà giáo dục: Người kiến tạo hòa bình</h4>
+                                    <p>Vai trò người hòa giải (Mediator): Giáo viên, đặc biệt là giáo viên chủ nhiệm, được xem là "linh hồn của lớp học" và đóng vai trò quyết định, chiếm hơn 70% hiệu quả trong việc phòng tránh bạo lực học đường. Giáo viên cần can thiệp kịp thời ngay từ những mâu thuẫn nhỏ, giải quyết vấn đề một cách công bằng, thấu đáo và không thiên vị bất kỳ học sinh nào.</p>
+                                    <p><strong>Các nguyên tắc và bước hòa giải chuyên nghiệp:</strong></p>
+                                    <ul>
+                                        <li><strong>Tạo không gian an toàn:</strong> Chỉ bắt đầu quá trình hòa giải khi các bên đã thực sự bình tĩnh. Nên tổ chức một cuộc đối thoại riêng, không phán xét trước mặt cả lớp.</li>
+                                        <li><strong>Lắng nghe đa chiều:</strong> Lắng nghe tích cực câu chuyện từ mỗi học sinh. Khuyến khích các em nhắc lại những gì người kia nói và thử đặt mình vào vị thế của nhau để suy ngẫm.</li>
+                                        <li><strong>Hướng đến giải pháp:</strong> Hướng dẫn và khuyến khích các em tự đề xuất các phương án giải quyết, sau đó lựa chọn giải pháp mà cả hai có thể chấp nhận và cam kết thực hiện.</li>
+                                        <li><strong>Xây dựng môi trường lớp học tích cực:</strong> Giáo viên không chỉ là người xử lý khủng hoảng mà còn là người chủ động xây dựng văn hóa phòng ngừa. Điều này bao gồm việc thiết lập các quy tắc ứng xử rõ ràng, nhất quán; thường xuyên ghi nhận và khen thưởng các hành vi tích cực; và lồng ghép việc giáo dục kỹ năng sống vào các môn học và hoạt động trên lớp.</li>
+                                    </ul>
+                                    <h4>4.4. Giải pháp toàn diện: Xây dựng văn hóa học đường tích cực</h4>
+                                    <p>Để giải quyết vấn đề tận gốc, các biện pháp cần được triển khai ở cấp độ toàn trường và có sự tham gia của cả cộng đồng.</p>
+                                    <ul>
+                                        <li><strong>Tăng cường hoạt động ngoại khóa và giao lưu:</strong> Các hoạt động cộng đồng, câu lạc bộ, và các sự kiện thể thao, văn nghệ giúp học sinh từ các nhóm khác nhau có cơ hội tương tác và xây dựng mối quan hệ tích cực. Thống kê cho thấy, các trường học tích cực tổ chức những hoạt động này có tỷ lệ xung đột giảm tới 25% so với các trường chỉ tập trung vào học thuật.</li>
+                                        <li><strong>Thành lập các mô hình hỗ trợ chuyên biệt:</strong>
+                                            <ul class="list-[circle] ml-6">
+                                                <li><strong>Phòng tư vấn tâm lý học đường:</strong> Đây phải là một không gian an toàn, bảo mật và thân thiện, nơi học sinh có thể tìm đến để chia sẻ những áp lực, lo âu hay khó khăn trong các mối quan hệ mà không sợ bị phán xét.</li>
+                                                <li><strong>Đội ngũ hòa giải đồng đẳng (Peer Mediation):</strong> Đây là một mô hình rất hiệu quả, trong đó nhà trường đào tạo một nhóm học sinh có uy tín và kỹ năng để trở thành những người hòa giải cho bạn bè. Ưu điểm lớn của mô hình này là học sinh thường cảm thấy thoải mái và dễ dàng chia sẻ với bạn bè đồng trang lứa hơn là với người lớn. Nó không chỉ giúp giải quyết xung đột mà còn rèn luyện cho chính các em trong đội ngũ những kỹ năng quý giá như lãnh đạo, giao tiếp và đồng cảm.</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>Sự chung tay của toàn xã hội:</strong> Xây dựng một trường học an toàn, không bạo lực không chỉ là trách nhiệm của riêng ngành giáo dục. Đó là trách nhiệm chung của cả gia đình, nhà trường và toàn xã hội. Cần có sự phối hợp đồng bộ để tạo ra một môi trường vĩ mô lành mạnh, nơi các giá trị của sự tôn trọng, yêu thương và đối thoại được đề cao.</li>
+                                    </ul>
+                                    <div class="my-8 overflow-x-auto"><table class="min-w-full bg-white border border-amber-200 rounded-lg shadow"><thead class="bg-amber-100"><tr><th class="p-4 border-b text-left font-bold">Đối tượng</th><th class="p-4 border-b text-left font-bold">Hành động nên làm</th><th class="p-4 border-b text-left font-bold">Hành động cần tránh</th></tr></thead><tbody><tr class="hover:bg-amber-50"><td class="p-4 border-b font-bold">Học sinh</td><td class="p-4 border-b">Học kỹ năng quản lý cảm xúc, lắng nghe. Tìm kiếm sự giúp đỡ khi cần. Lên tiếng bảo vệ bạn bè.</td><td class="p-4 border-b">Im lặng chịu đựng. Dùng bạo lực để trả đũa. Đứng nhìn một cách vô cảm.</td></tr><tr class="hover:bg-amber-50"><td class="p-4 border-b font-bold">Phụ huynh</td><td class="p-4 border-b">Lắng nghe con không phán xét. Dạy con kỹ năng, làm gương. Phối hợp với nhà trường.</td><td class="p-4 border-b">Đổ lỗi cho con. Dạy con trả thù. Tự ý hành động nóng vội.</td></tr><tr class="hover:bg-amber-50"><td class="p-4 border-b font-bold">Giáo viên</td><td class="p-4 border-b">Can thiệp kịp thời, công bằng. Tạo không gian đối thoại an toàn. Tích hợp giáo dục kỹ năng sống.</td><td class="p-4 border-b">Phớt lờ mâu thuẫn nhỏ. Thiên vị, phán xét. Chỉ dùng hình thức kỷ luật.</td></tr><tr class="hover:bg-amber-50"><td class="p-4 border-b font-bold">Nhà trường</td><td class="p-4 border-b">Xây dựng chính sách phòng chống bạo lực. Tổ chức hoạt động ngoại khóa. Thiết lập kênh hỗ trợ (tư vấn, hòa giải đồng đẳng).</td><td class="p-4 border-b">Xem nhẹ các vụ việc. Thiếu sự phối hợp với gia đình. Chỉ tập trung vào học thuật.</td></tr></tbody></table></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Item 5 -->
+                         <div class="accordion-item bg-white rounded-lg shadow-md overflow-hidden border border-amber-200">
+                             <button class="accordion-header w-full text-left p-6 flex justify-between items-center hover:bg-amber-50 transition-colors">
+                                <span class="text-2xl font-bold">Phần V: Kết luận</span>
+                                <i class="ph-caret-down text-2xl accordion-icon transition-transform duration-300"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="p-6 pt-2 handbook-content text-lg border-t border-amber-200">
+                                    <p>Mâu thuẫn trong môi trường học đường là một hiện tượng tự nhiên và không thể tránh khỏi, nhưng cách chúng ta ứng xử với nó sẽ quyết định liệu nó sẽ trở thành một cơ hội để trưởng thành hay một nguồn cơn của những tổn thương. Việc giải quyết mâu thuẫn không nên được nhìn nhận như một hành động dập tắt các "đám cháy" khi chúng bùng phát, mà phải là một quá trình vun trồng và xây dựng văn hóa ứng xử tích cực một cách chủ động và bền bỉ.</p>
+                                    <p>Báo cáo này đã trình bày một cách tiếp cận toàn diện, chuyển đổi từ tư duy phản ứng (chỉ tập trung vào trừng phạt hành vi sai trái) sang tư duy phòng ngừa và kiến tạo (tập trung vào việc trang bị kỹ năng và xây dựng môi trường hỗ trợ). Bằng cách trang bị cho học sinh những kỹ năng cốt lõi như quản lý cảm xúc, lắng nghe thấu cảm và đàm phán hợp tác, chúng ta không chỉ giúp các em giải quyết xung đột mà còn đang đầu tư vào sự phát triển năng lực lãnh đạo, tư duy sáng tạo và trí tuệ cảm xúc – những hành trang quý giá cho tương lai.</p>
+                                    <p>Tuy nhiên, học sinh không thể đơn độc trên hành trình này. Sự thành công đòi hỏi một cam kết mạnh mẽ và sự phối hợp đồng bộ từ cả hệ sinh thái hỗ trợ: gia đình là nơi làm gương và đồng hành, giáo viên là người dẫn dắt và hòa giải, nhà trường là nơi kiến tạo môi trường an toàn. Chỉ khi tất cả các bên cùng chung tay hành động, chúng ta mới có thể thực sự biến trường học thành một không gian của sự tôn trọng, thấu hiểu và phát triển toàn diện, nơi mọi mâu thuẫn đều có thể được hóa giải một cách xây dựng.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE 4: PLAYTEST -->
+        <div id="page-playtest" class="hidden">
+            <section id="dang-ky" class="py-16 md:py-24">
+                <div class="container mx-auto px-6 text-center">
+                    <img src="7.jpg" alt="Hộp game Kính Vạn Hoa" class="mx-auto mb-8 rounded-lg shadow-xl">
+                    <h2 class="text-3xl md:text-4xl font-bold">Trở thành những người chơi đầu tiên!</h2>
+                    <p class="text-xl my-4 max-w-2xl mx-auto">Chúng tôi đang tìm kiếm những người bạn cùng chung đam mê để trải nghiệm và góp ý hoàn thiện "KÍNH VẠN HOA".</p>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLScj-i0bGZGGbPqvO4gZoDed88Jsm-mhViPQy3gQ6GsPWiLL0A/viewform?usp=header" target="_blank" rel="noopener noreferrer" class="mt-4 inline-block bg-red-600 hover:bg-red-700 text-white font-bold text-xl py-4 px-10 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 font-special tracking-wider">
+                        Đăng ký thử nghiệm ngay!
+                    </a>
+                </div>
+            </section>
+            <section id="phan-hoi" class="py-16 md:py-24 bg-amber-50 bg-opacity-50">
+                <div class="container mx-auto px-6">
+                    <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-2xl border-t-4 border-green-500 text-center">
+                        <h2 class="text-4xl md:text-5xl font-bold mb-4">Chia sẻ cảm nhận của bạn</h2>
+                        <p class="mb-6 text-lg">Chúng tôi rất mong được lắng nghe ý kiến của bạn để trò chơi ngày một hoàn thiện hơn. Hãy nhấn vào nút bên dưới để gửi phản hồi qua Google Form nhé!</p>
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdkAJgBgH9TZyXcmtMGo75Iu0u8AjWyFiRI0c1N3hCRum2Hnw/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer" class="inline-block w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 font-special text-xl tracking-wider">
+                            Mở Form Gửi Cảm Nhận
+                        </a>
+                    </div>
+                </div>
+           </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-800 text-amber-100 py-12">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold font-special text-white">KÍNH VẠN HOA</h2>
+            <p class="mt-2 mb-6">Sống lại ký ức học trò - Mỗi lựa chọn định đoạt một tập thể.</p>
+            <a href="sotaykinhvanhoa.pdf" download="So-Tay-Luat-Choi-Kinh-Van-Hoa.pdf" class="inline-block bg-white text-stone-800 font-bold py-2 px-6 rounded-lg hover:bg-amber-100 transition-colors mb-6">
+                Tải file luật chơi (PDF)
+            </a>
+            <div class="text-center">
+                 <p class="font-bold">Thông tin liên hệ:</p>
+                 <p>Email: <a href="mailto: thiennhan1338@gmail.com" class="hover:underline">contact@boardgamekinhvanhoa.vn</a></p>
+                 <p>Số điện thoại: 097 8043 812</p>
+            </div>
+            <div class="border-t border-stone-600 mt-8 pt-6 text-sm text-stone-400">
+                <p>&copy; 2024 Board Game KÍNH VẠN HOA. All Rights Reserved.</p>
+                <p>Website designed for project demonstration.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const pages = document.querySelectorAll('main > div[id^="page-"]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+
+            function showPage(pageId) {
+                pages.forEach(page => page.classList.add('hidden'));
+                const activePage = document.getElementById(pageId);
+                if (activePage) {
+                    activePage.classList.remove('hidden');
+                    activePage.classList.add('animate-page-fade-in');
+                }
+                window.scrollTo(0, 0);
+
+                // Update active nav link
+                navLinks.forEach(link => {
+                    link.classList.toggle('active-nav', 'page-' + link.dataset.page === pageId);
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = 'page-' + this.dataset.page;
+                    showPage(pageId);
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            // Mobile menu toggle
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Initial page load
+            showPage('page-home');
+
+            // Scroll reveal animation
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add('is-visible');
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+            
+            // Accordion Handler
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = item.querySelector('.accordion-icon');
+
+                header.addEventListener('click', () => {
+                    const isOpened = content.style.maxHeight;
+                    if (isOpened) {
+                        content.style.maxHeight = null;
+                        icon.classList.remove('rotate-180');
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.classList.add('rotate-180');
+                    }
+                });
+            });
+
+
+            // Mini-Quiz interaction
+            document.querySelectorAll('.quiz-container').forEach(quiz => {
+                const options = quiz.querySelectorAll('.quiz-option');
+                const feedbackEl = quiz.querySelector('.quiz-feedback');
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        options.forEach(btn => btn.disabled = true);
+                        feedbackEl.classList.remove('hidden');
+                        if (option.hasAttribute('data-correct')) {
+                            option.style.backgroundColor = '#D1FAE5';
+                            feedbackEl.textContent = 'Chính xác! Lắng nghe là bước đầu tiên để thấu hiểu.';
+                            feedbackEl.className = 'quiz-feedback mt-2 p-2 rounded bg-green-100 text-green-800';
+                        } else {
+                            option.style.backgroundColor = '#FEE2E2';
+                            feedbackEl.textContent = 'Chưa đúng lắm. Việc cố gắng thắng trong tranh luận thường làm tình hình tệ hơn.';
+                            feedbackEl.className = 'quiz-feedback mt-2 p-2 rounded bg-red-100 text-red-800';
+                            quiz.querySelector('[data-correct]').style.backgroundColor = '#D1FAE5';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
