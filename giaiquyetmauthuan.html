@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ở đây có sự trợ giúp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+    <style>
+        /* New Font and Soft Animated Background */
+        body {
+            font-family: 'Patrick Hand', cursive;
+            background: linear-gradient(-45deg, #a8d0e6, #f76c6c, #f8e9a1, #98ded9);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: #333;
+            padding: 1rem;
+            font-size: 1.25rem; /* Larger base font size for readability */
+        }
+ 
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+ 
+        /* Main content panel styled as a notebook page */
+        .main-panel {
+            background-color: #fdfaf4;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            background-image: repeating-linear-gradient(#e0e0e0 0 1px, transparent 1px 100%);
+            background-size: 100% 2.2rem; /* Line height for the notebook paper */
+        }
+ 
+        /* Header Text Styles */
+        .page-title {
+            color: #2c5282; /* Dark Blue */
+            font-size: 3.5rem;
+            line-height: 1;
+        }
+        
+        .page-subtitle {
+            color: #718096; /* Slate Gray */
+            font-size: 1.5rem;
+        }
+ 
+        /* Search Input Style */
+        #searchInput {
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            color: #333;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            padding: 1rem 1.5rem;
+        }
+ 
+        #searchInput::placeholder {
+            color: #a0aec0;
+        }
+ 
+        #searchInput:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(168, 208, 230, 0.6);
+            border-color: #a8d0e6;
+        }
+ 
+        /* Result Card Style with animation */
+        .result-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            opacity: 0; /* Start hidden for animation */
+        }
+        
+        .result-card.visible {
+             animation: fallIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+ 
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+        }
+ 
+        .result-card h3 {
+            color: #c53030; /* Dark Red */
+            font-size: 1.75rem;
+        }
+        .result-card h4 {
+            color: #2d3748; /* Dark Gray */
+            font-size: 1.4rem;
+        }
+        .result-card p {
+            color: #4a5568; /* Gray */
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+        
+        /* Animation for cards falling in */
+        @keyframes fallIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* Messages */
+        .message-text {
+             font-size: 1.75rem;
+             color: #4a5568;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+ 
+    <div class="container mx-auto main-panel max-w-7xl">
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="page-title font-bold">Ở đây có sự trợ giúp</h1>
+            <p class="mt-4 page-subtitle max-w-3xl mx-auto">Gõ từ khóa về tình huống bạn đang gặp phải vào ô tìm kiếm bên dưới để tìm giải pháp.</p>
+        </header>
+ 
+        <main>
+            <!-- Search Bar -->
+            <div class="max-w-3xl mx-auto mb-10">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm: 'bạn bè', 'gia đình', 'thầy cô'..."
+                           class="w-full">
+                </div>
+            </div>
+ 
+            <!-- Results Section -->
+            <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Search results will be injected here -->
+            </div>
+            
+            <!-- Initial Message/No Results Message -->
+            <div id="initialMessage" class="text-center py-16">
+                <p class="message-text">Bắt đầu tìm kiếm để khám phá các giải pháp.</p>
+            </div>
+ 
+            <div id="noResultsMessage" class="hidden text-center py-16">
+                <p class="message-text">Không tìm thấy tình huống nào phù hợp.</p>
+            </div>
+        </main>
+    </div>
+ 
+    <script>
+        const data = [
+            {
+                "stt": "1",
+                "tinhHuong": "Mâu thuẫn khi làm việc nhóm: một thành viên ỷ lại, không đóng góp nhưng vẫn muốn có tên và điểm cao.",
+                "nguyenNhan": "Thiếu kỹ năng hợp tác, ý thức trách nhiệm kém, tâm lý \"ăn theo\", sự nể nang hoặc sợ mất lòng của các thành viên khác.",
+                "tuKhoa": "cách giải quyết mâu thuẫn nhóm, thành viên lười biếng trong nhóm, phân chia công việc nhóm",
+                "giaiPhap": "- Nhóm trưởng: Thiết lập quy tắc nhóm rõ ràng ngay từ đầu, phân công nhiệm vụ cụ thể cho từng người. Gặp riêng và trao đổi thẳng thắn với bạn đó. Nếu không thay đổi, báo cáo với giáo viên để có sự can thiệp.\n- Các thành viên: Hỗ trợ, nhắc nhở bạn cùng làm. Không làm thay phần việc của bạn.\n- Giáo viên: Hướng dẫn kỹ năng làm việc nhóm. Áp dụng phương pháp đánh giá chéo và đánh giá cá nhân trong bài tập nhóm."
+            },
+            {
+                "stt": "2",
+                "tinhHuong": "Ghen tị, nói xấu khi bạn được điểm cao hơn hoặc được thầy cô khen ngợi.",
+                "nguyenNhan": "Lòng đố kỵ, tâm lý cạnh tranh không lành mạnh, sự tự ti về năng lực bản thân, áp lực từ gia đình phải luôn đứng đầu.",
+                "tuKhoa": "bị bạn bè ghen ghét vì học giỏi, đối phó với sự đố kỵ, tâm lý ghen tị tuổi học trò",
+                "giaiPhap": "- Bản thân: Giữ thái độ khiêm tốn, sẵn sàng giúp đỡ bạn bè trong học tập. Tập trung vào nỗ lực của bản thân.\n- Người nói xấu: Cần nhận thức rằng thành công của bạn là do nỗ lực. Tìm cách cải thiện kết quả của mình thay vì hạ bệ người khác.\n- Giáo viên/Phụ huynh: Giáo dục về đức tính trung thực, tinh thần học hỏi."
+            },
+            {
+                "stt": "3",
+                "tinhHuong": "Phát hiện bạn thân gian lận trong thi cử (quay cóp, xem tài liệu).",
+                "nguyenNhan": "Áp lực điểm số, sợ bị điểm kém, lười học, tâm lý muốn có thành tích mà không cần nỗ lực.",
+                "tuKhoa": "bạn thân gian lận thi cử, có nên báo cáo bạn quay cóp, xử lý khi bạn chép bài",
+                "giaiPhap": "- Bản thân: Sau giờ thi, gặp riêng bạn để nói chuyện, khuyên bạn nên trung thực. Nhấn mạnh về hậu quả nếu bị phát hiện.\n- Người gian lận: Cần nhận ra sai lầm, xin lỗi và hứa sẽ không tái phạm.\n- Giáo viên: Tăng cường giám sát trong thi cử. Giáo dục về tính trung thực và hậu quả của gian lận."
+            },
+            {
+                "stt": "4",
+                "tinhHuong": "Tranh cãi về đáp án, cách giải một bài tập, không ai chịu nhường ai.",
+                "nguyenNhan": "Cái tôi cá nhân cao, mong muốn chứng tỏ mình đúng, thiếu kỹ năng lắng nghe và tôn trọng ý kiến khác biệt.",
+                "tuKhoa": "tranh cãi khi học nhóm, bất đồng quan điểm học tập, làm sao để tranh luận văn minh",
+                "giaiPhap": "- Các bên: Dừng tranh cãi. Cùng nhau kiểm tra lại kiến thức từ sách giáo khoa, tài liệu hoặc hỏi giáo viên/bạn học giỏi khác để tìm ra câu trả lời chính xác.\n- Giáo viên: Khuyến khích tinh thần tranh luận học thuật lành mạnh."
+            },
+            {
+                "stt": "5",
+                "tinhHuong": "Một học sinh giỏi bị các bạn khác \"phong tỏa\", không cho những bạn học yếu hơn hỏi bài.",
+                "nguyenNhan": "Tâm lý ích kỷ, muốn giữ \"bí quyết\" cho riêng mình, sợ người khác giỏi hơn.",
+                "tuKhoa": "bị bạn học giỏi cô lập, bạn học giỏi không chỉ bài, làm sao để học hỏi bạn bè",
+                "giaiPhap": "- Học sinh bị cản trở: Mạnh dạn hỏi trực tiếp bạn học giỏi hoặc nhờ các bạn khác. Báo cáo với giáo viên chủ nhiệm.\n- Học sinh giỏi: Cần hiểu rằng chia sẻ kiến thức là cách để củng cố và học hỏi thêm.\n- Giáo viên: Xây dựng phong trào \"đôi bạn cùng tiến\"."
+            },
+            {
+                "stt": "6",
+                "tinhHuong": "Chê bai, mỉa mai khi bạn đặt câu hỏi \"ngô nghê\" trong lớp.",
+                "nguyenNhan": "Thiếu sự đồng cảm, tâm lý coi thường người khác, muốn tỏ ra mình thông minh hơn.",
+                "tuKhoa": "bị bạn chê cười khi phát biểu, sợ đặt câu hỏi trong lớp, làm sao để tự tin hỏi bài",
+                "giaiPhap": "- Nạn nhân: Không nên xấu hổ. Việc đặt câu hỏi thể hiện tinh thần ham học hỏi.\n- Người chê bai: Cần được giáo dục về sự tôn trọng.\n- Giáo viên: Bảo vệ và khuyến khích học sinh đặt câu hỏi."
+            },
+            {
+                "stt": "7",
+                "tinhHuong": "Xung đột khi một học sinh thường xuyên khoe khoang thành tích cá nhân.",
+                "nguyenNhan": "Nhu cầu được công nhận cao, đôi khi là cách che giấu sự tự ti.",
+                "tuKhoa": "bạn cùng lớp hay khoe khoang, khó chịu vì bạn khoe thành tích, cách đối phó với người thích thể hiện",
+                "giaiPhap": "- Người nghe: Có thể phớt lờ hoặc góp ý nhẹ nhàng.\n- Người khoe khoang: Cần học cách chia sẻ thành công một cách khiêm tốn.\n- Giáo viên: Dạy học sinh về sự khiêm tốn."
+            },
+            {
+                "stt": "8",
+                "tinhHuong": "Mâu thuẫn vì cho bạn mượn vở chép bài nhưng bạn lại tự ý sửa đổi, ghi thêm vào vở.",
+                "nguyenNhan": "Thiếu tôn trọng tài sản cá nhân, tính cẩu thả, hoặc cố ý phá hoại.",
+                "tuKhoa": "bạn mượn vở làm bẩn, xử lý khi bạn làm hỏng đồ",
+                "giaiPhap": "- Chủ nhân cuốn vở: Yêu cầu bạn giải thích và xin lỗi.\n- Người mượn: Phải xin lỗi chân thành và đề nghị sửa chữa."
+            },
+            {
+                "stt": "9",
+                "tinhHuong": "Cạnh tranh vị trí trong đội tuyển học sinh giỏi dẫn đến nói xấu, cản trở nhau.",
+                "nguyenNhan": "Áp lực thành tích, sự ích kỷ, nỗi sợ bị vượt qua.",
+                "tuKhoa": "cạnh tranh không lành mạnh trong học tập, bị bạn chơi xấu trong đội tuyển",
+                "giaiPhap": "- Các thành viên: Cần nhận thức rằng đối thủ là các trường khác, không phải đồng đội.\n- Giáo viên phụ trách: Xây dựng tinh thần đồng đội."
+            },
+            {
+                "stt": "10",
+                "tinhHuong": "Một học sinh bị áp lực vì luôn phải cho bạn thân chép bài kiểm tra.",
+                "nguyenNhan": "Sự cả nể, sợ mất tình bạn. Người bạn thân có tâm lý ỷ lại, lười biếng.",
+                "tuKhoa": "bạn thân đòi chép bài, có nên cho bạn chép bài không",
+                "giaiPhap": "- Bản thân: Học cách nói \"không\" một cách khéo léo. Đề nghị giúp bạn học bài thay vì cho chép bài.\n- Người bạn thân: Cần tôn trọng bạn và tự nỗ lực."
+            },
+            {
+                "stt": "11",
+                "tinhHuong": "Bị một nhóm bạn trong lớp cô lập, tẩy chay, không ai nói chuyện cùng.",
+                "nguyenNhan": "Do khác biệt, hiểu lầm, sự đố kỵ, hoặc do một \"thủ lĩnh\" trong lớp khởi xướng.",
+                "tuKhoa": "bị bạn bè cô lập, làm gì khi bị tẩy chay, cách hòa nhập với lớp, bạo lực lạnh",
+                "giaiPhap": "- Nạn nhân: Tìm hiểu nguyên nhân, tìm kiếm sự hỗ trợ từ giáo viên, chuyên gia tâm lý.\n- Nhóm cô lập: Cần được giáo dục về hậu quả của bạo lực tinh thần.\n- Giáo viên: Quan sát và can thiệp sớm."
+            },
+            {
+                "stt": "12",
+                "tinhHuong": "Bị đặt điều, tung tin đồn thất thiệt (ví dụ: yêu đương, gia đình có vấn đề...).",
+                "nguyenNhan": "Ghen ghét, muốn hạ bệ uy tín của người khác, hoặc trò đùa ác ý.",
+                "tuKhoa": "bị nói xấu sau lưng, xử lý tin đồn ở trường học, cách đối mặt với tin đồn",
+                "giaiPhap": "- Nạn nhân: Giữ bình tĩnh, nhờ sự can thiệp của giáo viên hoặc phụ huynh.\n- Người tung tin: Phải công khai xin lỗi và đính chính thông tin.\n- Nhà trường: Xử lý nghiêm."
+            },
+            {
+                "stt": "13",
+                "tinhHuong": "Bị chế giễu, miệt thị ngoại hình (body-shaming).",
+                "nguyenNhan": "Thiếu sự đồng cảm, nhận thức lệch lạc về tiêu chuẩn cái đẹp.",
+                "tuKhoa": "bị body shaming, miệt thị ngoại hình ở trường, cách đáp trả khi bị chê béo/gầy",
+                "giaiPhap": "- Nạn nhân: Học cách yêu thương bản thân, báo cáo với giáo viên.\n- Người miệt thị: Cần được giáo dục về sự tổn thương do lời nói gây ra.\n- Nhà trường: Tổ chức các chiến dịch \"Nói không với body-shaming\"."
+            },
+            {
+                "stt": "14",
+                "tinhHuong": "Bị trêu chọc, kỳ thị vì có khuyết tật trên cơ thể.",
+                "nguyenNhan": "Sự thiếu hiểu biết, tò mò không đúng cách, hành vi bắt chước, sự vô tâm.",
+                "tuKhoa": "bị trêu chọc vì khuyết tật, phân biệt đối xử với người khuyết tật",
+                "giaiPhap": "- Nạn nhân: Tự tin vào những giá trị khác của bản thân, chia sẻ với giáo viên hoặc cha mẹ.\n- Người trêu chọc: Cần được giáo dục về sự đồng cảm.\n- Nhà trường: Xây dựng môi trường học đường hòa nhập."
+            },
+            {
+                "stt": "15",
+                "tinhHuong": "Bị kỳ thị, xa lánh vì hoàn cảnh gia đình khó khăn.",
+                "nguyenNhan": "Nhận thức sai lầm về giá trị vật chất, sự phân biệt giàu nghèo.",
+                "tuKhoa": "bị bạn coi thường vì nhà nghèo, phân biệt đối xử gia cảnh",
+                "giaiPhap": "- Nạn nhân: Tự hào về gia đình và nỗ lực học tập để khẳng định giá trị bản thân.\n- Người kỳ thị: Cần được giáo dục lại về giá trị con người.\n- Giáo viên: Dạy học sinh về sự bình đẳng, tôn trọng mọi ngành nghề."
+            },
+            {
+                "stt": "16",
+                "tinhHuong": "Bị bắt nạt, chế giễu vì là người đồng tính, song tính hoặc chuyển giới (LGBT).",
+                "nguyenNhan": "Thiếu kiến thức về đa dạng giới, định kiến xã hội.",
+                "tuKhoa": "học sinh LGBT bị kỳ thị, bị bắt nạt vì là gay/les",
+                "giaiPhap": "- Nạn nhân: Tìm kiếm các nhóm hỗ trợ cộng đồng LGBT, chia sẻ với người lớn tin tưởng.\n- Người bắt nạt: Cần được giáo dục về giới và tính dục.\n- Nhà trường: Xây dựng chính sách \"trường học an toàn và không kỳ thị\"."
+            },
+            {
+                "stt": "17",
+                "tinhHuong": "Bị bạn thân tiết lộ bí mật cá nhân cho cả lớp biết.",
+                "nguyenNhan": "Thiếu sự tôn trọng quyền riêng tư, muốn thu hút sự chú ý, hoặc do mâu thuẫn cá nhân.",
+                "tuKhoa": "bạn thân phản bội, bị tiết lộ bí mật",
+                "giaiPhap": "- Nạn nhân: Đối mặt trực tiếp với người bạn đó, xem xét lại mối quan hệ.\n- Người tiết lộ: Phải nhận ra lỗi lầm, xin lỗi nạn nhân.\n- Giáo viên: Dạy học sinh về tầm quan trọng của quyền riêng tư và lòng tin."
+            },
+            {
+                "stt": "18",
+                "tinhHuong": "Bị lập nhóm chat riêng trên mạng xã hội để nói xấu, chế ảnh.",
+                "nguyenNhan": "Sự hèn nhát, tâm lý bầy đàn, muốn giải trí bằng cách hạ bệ người khác.",
+                "tuKhoa": "bị nói xấu trong group chat, bắt nạt trên mạng, cyberbullying",
+                "giaiPhap": "- Nạn nhân: Chụp màn hình làm bằng chứng, chặn và báo cáo với người lớn.\n- Nhóm nói xấu: Toàn bộ thành viên phải chịu trách nhiệm.\n- Nhà trường: Cập nhật nội quy về việc sử dụng mạng xã hội."
+            },
+            {
+                "stt": "19",
+                "tinhHuong": "Cố tình phớt lờ, không trả lời khi bạn chào hỏi hoặc nói chuyện.",
+                "nguyenNhan": "Thể hiện sự coi thường, thái độ thù địch ngầm, hoặc là một phần của hành vi tẩy chay.",
+                "tuKhoa": "bị bạn bè bơ, tại sao bạn không nói chuyện với tôi",
+                "giaiPhap": "- Người bị phớt lờ: Không nên cố gắng níu kéo sự chú ý, tập trung vào các mối quan hệ tích cực khác.\n- Người phớt lờ: Nếu có mâu thuẫn, nên giải quyết trực tiếp."
+            },
+            {
+                "stt": "20",
+                "tinhHuong": "Bị ép tham gia vào một nhóm bạn, nếu từ chối sẽ bị đe dọa.",
+                "nguyenNhan": "Tâm lý băng nhóm, muốn thể hiện quyền lực.",
+                "tuKhoa": "bị ép vào băng nhóm, bị bạn bè đe dọa",
+                "giaiPhap": "- Nạn nhân: Kiên quyết từ chối, báo ngay cho cha mẹ và giáo viên.\n- Nhóm ép buộc: Nhà trường cần can thiệp mạnh mẽ để giải tán các băng nhóm tiêu cực."
+            },
+            {
+                "stt": "21",
+                "tinhHuong": "Bị mỉa mai, chê bai vì có sở thích khác biệt.",
+                "nguyenNhan": "Thiếu tôn trọng sự đa dạng, tâm lý đám đông.",
+                "tuKhoa": "bị chê vì sở thích khác người, tôn trọng sự khác biệt",
+                "giaiPhap": "- Nạn nhân: Tự tin và kiên định với sở thích của mình.\n- Người mỉa mai: Cần học cách mở rộng tư duy và tôn trọng sở thích của người khác."
+            },
+            {
+                "stt": "22",
+                "tinhHuong": "Bị bạn bè xa lánh sau khi nghỉ một thời gian dài.",
+                "nguyenNhan": "Sự thay đổi trong các nhóm chơi, thông tin sai lệch, hoặc sự ngại ngùng.",
+                "tuKhoa": "khó hòa nhập lại sau khi nghỉ học, bạn bè xa lánh",
+                "giaiPhap": "- Bản thân: Chủ động bắt chuyện, nhờ giáo viên chủ nhiệm giúp đỡ.\n- Bạn bè trong lớp: Cần thể hiện sự quan tâm, hỏi han và giúp đỡ bạn hòa nhập trở lại."
+            },
+            {
+                "stt": "23",
+                "tinhHuong": "Bị so sánh, chế giễu vì \"không sành điệu\", không dùng đồ hiệu.",
+                "nguyenNhan": "Áp lực từ chủ nghĩa vật chất, đánh giá con người qua vẻ bề ngoài.",
+                "tuKhoa": "bị bạn chê không sành điệu, đua đòi theo bạn bè",
+                "giaiPhap": "- Nạn nhân: Hiểu rằng giá trị con người không nằm ở những món đồ đắt tiền.\n- Người chế giễu: Cần được giáo dục về giá trị sống đích thực."
+            },
+            {
+                "stt": "24",
+                "tinhHuong": "Bị bạn bè nghi ngờ, gán tội \"mách lẻo\" với giáo viên.",
+                "nguyenNhan": "Tâm lý \"tìm vật tế thần\", sự nghi kỵ, thiếu tin tưởng.",
+                "tuKhoa": "bị nghi ngờ là người mách lẻo, bị cả lớp ghét oan",
+                "giaiPhap": "- Nạn nhân: Giữ bình tĩnh, khẳng định mình không làm, nhờ giáo viên can thiệp.\n- Cả lớp: Không nên vội vàng kết tội khi chưa có bằng chứng."
+            },
+            {
+                "stt": "25",
+                "tinhHuong": "Một học sinh mới chuyển đến bị \"ma cũ bắt nạt ma mới\".",
+                "nguyenNhan": "Tâm lý muốn thể hiện \"quyền lực\" của người cũ, hành vi bắt nạt.",
+                "tuKhoa": "ma cũ bắt nạt ma mới, cách hòa nhập ở trường mới",
+                "giaiPhap": "- Học sinh mới: Tỏ thái độ tự tin nhưng hòa đồng, báo cáo giáo viên nếu bị bắt nạt.\n- \"Ma cũ\": Cần được nhắc nhở rằng hành vi bắt nạt là không thể chấp nhận.\n- Giáo viên: Quan tâm đặc biệt đến học sinh mới."
+            },
+            {
+                "stt": "26",
+                "tinhHuong": "Hiểu lầm từ một bình luận, một lượt \"like\" hoặc \"thả cảm xúc\" trên mạng xã hội.",
+                "nguyenNhan": "Giao tiếp online thiếu ngữ cảnh, dễ suy diễn, sự nhạy cảm quá mức.",
+                "tuKhoa": "hiểu lầm trên mạng xã hội, mâu thuẫn vì facebook",
+                "giaiPhap": "- Các bên: Nên gặp mặt trực tiếp hoặc gọi điện để nói chuyện, làm rõ hiểu lầm.\n- Bạn bè chung: Đóng vai trò hòa giải."
+            },
+            {
+                "stt": "27",
+                "tinhHuong": "Mâu thuẫn trong tình yêu tuổi học trò: ghen tuông, hiểu lầm, đòi chia tay.",
+                "nguyenNhan": "Cảm xúc chưa ổn định, thiếu kinh nghiệm xử lý mối quan hệ.",
+                "tuKhoa": "ghen tuông tuổi học trò, cách chia tay văn minh, tình yêu học đường",
+                "giaiPhap": "- Các bên: Cần học cách tôn trọng không gian riêng, bình tĩnh nói chuyện.\n- Giáo viên/Phụ huynh: Tế nhị định hướng về tình bạn trong sáng."
+            },
+            {
+                "stt": "28",
+                "tinhHuong": "Va chạm nhỏ trong giờ ra chơi nhưng không xin lỗi, dẫn đến cãi vã.",
+                "nguyenNhan": "Cái tôi cao, tâm lý \"hơn thua\", dễ bị kích động.",
+                "tuKhoa": "va chạm ở sân trường, xử lý xích mích nhỏ",
+                "giaiPhap": "- Các bên: Người va chạm nên chủ động xin lỗi. Người bị va chạm nên bỏ qua.\n- Giáo viên/Giám thị: Can thiệp kịp thời."
+            },
+            {
+                "stt": "29",
+                "tinhHuong": "Mâu thuẫn vì khác biệt về quan điểm sống, thần tượng, phong cách âm nhạc...",
+                "nguyenNhan": "Mong muốn áp đặt quan điểm, thiếu sự tôn trọng sở thích cá nhân.",
+                "tuKhoa": "tranh cãi về thần tượng, khác biệt quan điểm với bạn bè",
+                "giaiPhap": "- Các bên: Chấp nhận rằng mỗi người có một sở thích và quan điểm riêng. Tôn trọng sự khác biệt."
+            },
+            {
+                "stt": "30",
+                "tinhHuong": "Mâu thuẫn do vay mượn tiền bạc hoặc đồ dùng cá nhân nhưng không trả đúng hẹn.",
+                "nguyenNhan": "Thiếu ý thức về trách nhiệm tài chính, sự cả nể.",
+                "tuKhoa": "bạn vay tiền không trả, đòi nợ bạn thân",
+                "giaiPhap": "- Người cho vay: Nhắc nhở bạn một cách riêng tư và lịch sự.\n- Người vay: Phải có trách nhiệm trả nợ đúng hẹn."
+            },
+            {
+                "stt": "31",
+                "tinhHuong": "\"Nhìn đểu\", \"nhìn móc\" nhau trong sân trường, dẫn đến thách thức, gây hấn.",
+                "nguyenNhan": "Sự nhạy cảm, suy diễn, tâm lý muốn thể hiện \"bản lĩnh\".",
+                "tuKhoa": "bị bạn nhìn đểu, xử lý khi bị gây hấn",
+                "giaiPhap": "- Bản thân: Tốt nhất là phớt lờ và đi chỗ khác. Nếu bị chặn đường, tìm cách thoát đến nơi đông người và báo cho người lớn.\n- Nhà trường: Tăng cường giám sát, xử lý nghiêm."
+            },
+            {
+                "stt": "32",
+                "tinhHuong": "Cãi nhau vì tranh giành chỗ ngồi.",
+                "nguyenNhan": "Tâm lý chiếm hữu, tính ích kỷ, không muốn nhường nhịn.",
+                "tuKhoa": "tranh giành chỗ ngồi, văn hóa xếp hàng",
+                "giaiPhap": "- Các bên: Cần tuân thủ quy định hoặc nguyên tắc \"ai đến trước được trước\".\n- Giáo viên: Có thể quy định sơ đồ chỗ ngồi."
+            },
+            {
+                "stt": "33",
+                "tinhHuong": "Mâu thuẫn giữa hai nhóm bạn thân chơi với nhau, do một người trong nhóm này nói xấu người trong nhóm kia.",
+                "nguyenNhan": "Thiếu sự thẳng thắn, tâm lý \"buôn chuyện\", truyền đạt thông tin sai lệch.",
+                "tuKhoa": "mâu thuẫn giữa các nhóm bạn, bạn thân chơi với người mình ghét",
+                "giaiPhap": "- Các bên: Đại diện của hai nhóm nên ngồi lại nói chuyện thẳng thắn.\n- Người gây chuyện: Phải xin lỗi cả hai bên."
+            },
+            {
+                "stt": "34",
+                "tinhHuong": "Một học sinh bị cả lớp ghét vì tính cách thẳng thắn, hay \"vạch lỗi\" của người khác.",
+                "nguyenNhan": "Kỹ năng giao tiếp kém, thiếu sự tinh tế trong góp ý.",
+                "tuKhoa": "góp ý không làm mất lòng bạn, bị ghét vì quá thẳng tính",
+                "giaiPhap": "- Học sinh thẳng tính: Cần học cách góp ý một cách xây dựng và riêng tư.\n- Cả lớp: Cần phân biệt giữa góp ý thẳng thắn và chỉ trích ác ý."
+            },
+            {
+                "stt": "35",
+                "tinhHuong": "Mâu thuẫn trong các hoạt động thể thao, ngoại khóa.",
+                "nguyenNhan": "Tính hiếu thắng cao, không chấp nhận thất bại, tinh thần thể thao kém.",
+                "tuKhoa": "chơi không đẹp trong thể thao, tinh thần fair-play",
+                "giaiPhap": "- Các bên: Cần đặt tinh thần thể thao và sự vui vẻ lên trên hết.\n- Giáo viên/Người tổ chức: Phổ biến luật chơi rõ ràng, nhấn mạnh về tinh thần fair-play."
+            },
+            {
+                "stt": "36",
+                "tinhHuong": "Hai bạn thân cùng thích một người, dẫn đến cạnh tranh, nói xấu nhau.",
+                "nguyenNhan": "Ghen tuông, nỗi sợ bị từ chối, đặt tình cảm yêu đương lên trên tình bạn.",
+                "tuKhoa": "bạn thân và tôi cùng thích một người, xử lý tình tay ba",
+                "giaiPhap": "- Hai người bạn: Nên nói chuyện thẳng thắn, tôn trọng quyết định của người thứ ba, hoặc cùng lùi lại để giữ gìn tình bạn."
+            },
+            {
+                "stt": "37",
+                "tinhHuong": "Mâu thuẫn vì một người bạn thường xuyên trễ hẹn, không giữ lời hứa.",
+                "nguyenNhan": "Thiếu ý thức về thời gian và trách nhiệm.",
+                "tuKhoa": "bạn bè hay cao su, khó chịu vì bạn không giữ lời",
+                "giaiPhap": "- Người bị cho leo cây: Góp ý thẳng thắn với bạn.\n- Người hay trễ hẹn: Cần nhận ra thói quen xấu và nỗ lực thay đổi."
+            },
+            {
+                "stt": "38",
+                "tinhHuong": "Xích mích vì lỡ lời nói đùa quá trớn, động chạm đến điểm nhạy cảm của bạn.",
+                "nguyenNhan": "Sự vô tâm, thiếu tinh tế, không lường trước được hậu quả của lời nói.",
+                "tuKhoa": "đùa vô duyên, nói đùa không vui",
+                "giaiPhap": "- Người nói đùa: Phải nhận ra sai lầm và xin lỗi ngay lập tức một cách chân thành.\n- Người bị tổn thương: Thể hiện rõ thái độ không hài lòng."
+            },
+            {
+                "stt": "39",
+                "tinhHuong": "Mâu thuẫn vì một người bạn có tính \"phòng thủ\", luôn cho rằng người khác đang công kích mình.",
+                "nguyenNhan": "Sự tự ti, trải nghiệm tiêu cực trong quá khứ, tâm lý nhạy cảm quá mức.",
+                "tuKhoa": "bạn bè quá nhạy cảm, tâm lý phòng thủ",
+                "giaiPhap": "- Bạn bè: Cần kiên nhẫn và lựa chọn từ ngữ cẩn thận.\n- Người nhạy cảm: Cần học cách nhìn nhận vấn đề khách quan hơn."
+            },
+            {
+                "stt": "40",
+                "tinhHuong": "Xung đột nảy sinh từ việc chia sẻ đồ ăn, một người ăn nhiều hơn hoặc ăn món ngon nhất.",
+                "nguyenNhan": "Tính ích kỷ, thiếu sự quan sát và quan tâm đến cảm xúc của người khác.",
+                "tuKhoa": "mâu thuẫn khi chia đồ ăn, văn hóa chia sẻ",
+                "giaiPhap": "- Các bên: Nên học cách chia sẻ công bằng.\n- Cha mẹ: Dạy con về sự chia sẻ và quan tâm đến người khác từ nhỏ."
+            },
+            {
+                "stt": "41",
+                "tinhHuong": "Đánh nhau có tổ chức, hẹn gặp sau giờ học để \"giải quyết mâu thuẫn\".",
+                "nguyenNhan": "Tâm lý băng nhóm, muốn giải quyết vấn đề bằng vũ lực, bị bạn bè kích động.",
+                "tuKhoa": "học sinh hẹn đánh nhau, giải quyết mâu thuẫn bằng bạo lực",
+                "giaiPhap": "- Người trong cuộc: Tìm cách giải quyết bằng đối thoại, báo cáo cho người lớn.\n- Bạn bè: Không cổ vũ, báo ngay cho người lớn.\n- Nhà trường: Phối hợp với công an để răn đe, xử lý."
+            },
+            {
+                "stt": "42",
+                "tinhHuong": "Trấn lột tiền, điện thoại hoặc các tài sản có giá trị khác của bạn học.",
+                "nguyenNhan": "Lòng tham, muốn có tiền tiêu xài nhưng lười lao động, hành vi lệch lạc.",
+                "tuKhoa": "bị trấn lột ở trường, bị bạn bè cướp tiền",
+                "giaiPhap": "- Nạn nhân: Không nên chống cự, cố gắng ghi nhớ đặc điểm, báo ngay cho người lớn.\n- Kẻ trấn lột: Là hành vi vi phạm pháp luật, cần bị xử lý nghiêm.\n- Nhà trường: Tăng cường an ninh, giáo dục pháp luật."
+            },
+            {
+                "stt": "43",
+                "tinhHuong": "Cố ý phá hoại đồ dùng học tập của bạn.",
+                "nguyenNhan": "Ghen tị, muốn trả thù một cách hèn nhát, hành vi phá hoại ngầm.",
+                "tuKhoa": "bị bạn phá hoại đồ dùng, trả thù bạn học",
+                "giaiPhap": "- Nạn nhân: Báo cáo ngay cho giáo viên, yêu cầu bồi thường.\n- Người phá hoại: Phải bồi thường thiệt hại và chịu hình thức kỷ luật."
+            },
+            {
+                "stt": "44",
+                "tinhHuong": "Ném đồ đạc vào người khác trong lớp.",
+                "nguyenNhan": "Hành vi thiếu kiểm soát, đùa giỡn nguy hiểm, không ý thức được hậu quả.",
+                "tuKhoa": "học sinh ném đồ trong lớp, trò đùa nguy hiểm",
+                "giaiPhap": "- Các bên: Cần nhận thức đây là hành vi nguy hiểm.\n- Giáo viên: Phải ngăn chặn ngay lập tức, phân tích hậu quả."
+            },
+            {
+                "stt": "45",
+                "tinhHuong": "Xô đẩy, ngáng chân bạn ở cầu thang, hành lang.",
+                "nguyenNhan": "Trò đùa ác ý, hành vi bắt nạt, có thể gây ra tai nạn nghiêm trọng.",
+                "tuKhoa": "bị bạn ngáng chân, an toàn trường học",
+                "giaiPhap": "- Nạn nhân: Báo cáo ngay cho giám thị hoặc giáo viên.\n- Người thực hiện: Cần bị kỷ luật nghiêm khắc.\n- Nhà trường: Tăng cường giám sát."
+            },
+            {
+                "stt": "46",
+                "tinhHuong": "Bị một nhóm học sinh vây đánh (đánh hội đồng) sau khi tan học.",
+                "nguyenNhan": "Mâu thuẫn cá nhân leo thang, tâm lý bầy đàn, sự hèn nhát.",
+                "tuKhoa": "bị đánh hội đồng, cách tự vệ khi bị tấn công",
+                "giaiPhap": "- Nạn nhân: Cố gắng bảo vệ các vùng trọng yếu, la lớn, trình báo nhà trường, công an.\n- Nhóm tấn công: Hành vi vi phạm pháp luật, cần chịu trách nhiệm.\n- Nhà trường/Gia đình/Công an: Phối hợp chặt chẽ để điều tra, xử lý."
+            },
+            {
+                "stt": "47",
+                "tinhHuong": "Sử dụng vật nhọn (compa, dao rọc giấy) để đe dọa, gây thương tích cho bạn.",
+                "nguyenNhan": "Mức độ bạo lực nghiêm trọng, sự hung hăng mất kiểm soát.",
+                "tuKhoa": "học sinh dùng dao đâm bạn, mang vũ khí đến trường",
+                "giaiPhap": "- Nạn nhân: Giữ khoảng cách an toàn, báo động cho người xung quanh.\n- Người sử dụng vũ khí: Cần bị đình chỉ học tập để có biện pháp can thiệp đặc biệt.\n- Nhà trường: Phải có quy định cấm tuyệt đối việc mang hung khí."
+            },
+            {
+                "stt": "48",
+                "tinhHuong": "Bắt nạt thể chất đối với những bạn yếu thế hơn.",
+                "nguyenNhan": "Tâm lý muốn thể hiện quyền lực, sự hèn nhát.",
+                "tuKhoa": "bị bạn to con bắt nạt, làm gì khi bị bạn bè ức hiếp",
+                "giaiPhap": "- Nạn nhân: Dũng cảm lên tiếng, báo cho người lớn.\n- Kẻ bắt nạt: Cần được can thiệp về tâm lý và bị kỷ luật.\n- Bạn bè xung quanh: Không làm ngơ, đoàn kết bảo vệ bạn."
+            },
+            {
+                "stt": "49",
+                "tinhHuong": "Đổ đồ ăn, thức uống lên người bạn một cách cố ý.",
+                "nguyenNhan": "Hành vi làm nhục, sỉ nhục người khác trước đám đông.",
+                "tuKhoa": "bị bạn đổ đồ ăn lên người, cách làm nhục bạn bè",
+                "giaiPhap": "- Nạn nhân: Giữ bình tĩnh, báo cáo sự việc cho giáo viên.\n- Người thực hiện: Hành vi đáng bị lên án và kỷ luật nặng, phải công khai xin lỗi."
+            },
+            {
+                "stt": "50",
+                "tinhHuong": "Cố tình làm bẩn đồng phục, sách vở của bạn bằng mực, bút xóa.",
+                "nguyenNhan": "Hành vi phá hoại ngầm, gây phiền toái và thiệt hại vật chất.",
+                "tuKhoa": "bị bạn làm bẩn áo dài, phá hoại sách vở",
+                "giaiPhap": "- Nạn nhân: Báo cáo giáo viên, yêu cầu người làm bẩn phải giặt sạch hoặc đền bù.\n- Người thực hiện: Phải chịu trách nhiệm và bị ghi vào sổ theo dõi hạnh kiểm."
+            },
+            {
+                "stt": "51",
+                "tinhHuong": "Học sinh vi phạm nội quy và cãi lại, phản ứng gay gắt khi bị giáo viên nhắc nhở.",
+                "nguyenNhan": "Cái tôi cá nhân cao, muốn thể hiện sự khác biệt, tâm lý chống đối.",
+                "tuKhoa": "học sinh cãi lại giáo viên, vi phạm nội quy trường học",
+                "giaiPhap": "- Học sinh: Cần học cách kiểm soát cảm xúc và tôn trọng giáo viên.\n- Giáo viên: Giữ bình tĩnh, nói chuyện riêng với học sinh."
+            },
+            {
+                "stt": "52",
+                "tinhHuong": "Học sinh sử dụng điện thoại trong giờ học, bị giáo viên thu giữ và không chịu hợp tác.",
+                "nguyenNhan": "Sự phụ thuộc vào điện thoại, thiếu tập trung.",
+                "tuKhoa": "sử dụng điện thoại trong lớp, giáo viên thu điện thoại",
+                "giaiPhap": "- Học sinh: Phải tuân thủ nội quy của lớp học.\n- Giáo viên: Thực hiện dứt khoát nhưng không gay gắt."
+            },
+            {
+                "stt": "53",
+                "tinhHuong": "Học sinh ăn quà vặt, làm mất trật tự trong giờ học, bị nhắc nhở nhiều lần nhưng vẫn tái phạm.",
+                "nguyenNhan": "Thiếu ý thức kỷ luật, không tôn trọng giáo viên.",
+                "tuKhoa": "ăn vặt trong lớp, làm ồn trong giờ học",
+                "giaiPhap": "- Học sinh: Cần nhận thức được hành vi của mình đang ảnh hưởng đến người khác.\n- Giáo viên: Thay đổi phương pháp giảng dạy, áp dụng các biện pháp cứng rắn hơn."
+            },
+            {
+                "stt": "54",
+                "tinhHuong": "Học sinh ngủ gật trong lớp, bị giáo viên gọi dậy và có thái độ bực bội.",
+                "nguyenNhan": "Do mệt mỏi hoặc do bài giảng nhàm chán.",
+                "tuKhoa": "ngủ gật trong lớp, làm sao để không buồn ngủ khi học",
+                "giaiPhap": "- Học sinh: Cần điều chỉnh lại lịch sinh hoạt.\n- Giáo viên: Thay vì quát mắng, có thể gọi học sinh đứng dậy, đi rửa mặt."
+            },
+            {
+                "stt": "55",
+                "tinhHuong": "Giáo viên áp dụng hình phạt thể chất hoặc hình phạt làm sỉ nhục học sinh.",
+                "nguyenNhan": "Quan niệm giáo dục cũ, sự nóng giận, mất kiểm soát của giáo viên.",
+                "tuKhoa": "giáo viên phạt học sinh, hình phạt phi giáo dục",
+                "giaiPhap": "- Học sinh: Cần mạnh dạn báo cáo với ban giám hiệu hoặc cha mẹ.\n- Giáo viên: Cần nhận thức rằng các hình phạt này là sai và vi phạm đạo đức nhà giáo.\n- Nhà trường: Phải có quy định cấm tuyệt đối các hình phạt này."
+            },
+            {
+                "stt": "56",
+                "tinhHuong": "Học sinh bỏ tiết, trốn học và bị giáo viên phát hiện.",
+                "nguyenNhan": "Chán học, ham chơi, bị bạn bè rủ rê, hoặc có vấn đề tâm lý.",
+                "tuKhoa": "học sinh trốn học, làm gì khi con bỏ tiết",
+                "giaiPhap": "- Giáo viên: Cần tìm hiểu nguyên nhân sâu xa đằng sau hành vi, thay vì chỉ kỷ luật."
+            },
+            {
+                "stt": "57",
+                "tinhHuong": "Xung đột khi giáo viên kiểm tra bài cũ nhưng học sinh cho rằng không được báo trước.",
+                "nguyenNhan": "Học sinh có tâm lý học đối phó, giáo viên muốn kiểm tra kiến thức thực chất.",
+                "tuKhoa": "kiểm tra miệng đột xuất, học đối phó",
+                "giaiPhap": "- Học sinh: Cần thay đổi thói quen học tập, học để hiểu chứ không phải để thi.\n- Giáo viên: Giải thích mục đích của việc kiểm tra đột xuất."
+            },
+            {
+                "stt": "58",
+                "tinhHuong": "Học sinh phản đối khi bị giáo viên yêu cầu lao động vệ sinh lớp học như một hình thức phạt.",
+                "nguyenNhan": "Cho rằng đó không phải là trách nhiệm của mình, cảm thấy bị phạt không công bằng.",
+                "tuKhoa": "phạt lao động, giáo dục ý thức cộng đồng",
+                "giaiPhap": "- Học sinh: Cần hiểu rằng giữ gìn vệ sinh lớp học là trách nhiệm chung.\n- Giáo viên: Cần giải thích rõ đây là hình thức rèn luyện ý thức trách nhiệm."
+            },
+            {
+                "stt": "59",
+                "tinhHuong": "Học sinh cho rằng giáo viên chấm điểm không công bằng, \"trù dập\" mình.",
+                "nguyenNhan": "Cảm giác bị đối xử bất công, sự nhạy cảm của học sinh, hoặc do giáo viên có định kiến.",
+                "tuKhoa": "bị giáo viên trù dập, chấm điểm không công bằng",
+                "giaiPhap": "- Học sinh: Có thể lịch sự hỏi lại giáo viên hoặc xin phúc khảo.\n- Giáo viên: Sẵn sàng giải thích đáp án và thang điểm một cách công khai."
+            },
+            {
+                "stt": "60",
+                "tinhHuong": "Giáo viên cho cả lớp điểm 0 hoặc điểm kém vì mất trật tự.",
+                "nguyenNhan": "Sự tức giận, bất lực của giáo viên, muốn dùng điểm số làm công cụ trừng phạt.",
+                "tuKhoa": "cả lớp bị điểm 0, giáo viên dùng điểm số để phạt",
+                "giaiPhap": "- Giáo viên: Cần nhận ra đây là phương pháp phản giáo dục, cần xử lý những cá nhân vi phạm."
+            },
+            {
+                "stt": "61",
+                "tinhHuong": "Mâu thuẫn vì điểm số trên lớp và điểm học thêm của cùng một giáo viên có sự chênh lệch lớn.",
+                "nguyenNhan": "Nghi ngờ giáo viên \"găm bài\" để ép học sinh đi học thêm.",
+                "tuKhoa": "dạy thêm học thêm, tiêu cực trong giáo dục",
+                "giaiPhap": "- Học sinh/Phụ huynh: Phản ánh với ban giám hiệu.\n- Nhà trường: Quản lý chặt chẽ việc dạy thêm, học thêm."
+            },
+            {
+                "stt": "62",
+                "tinhHuong": "Học sinh phản ứng khi giáo viên công khai điểm số thấp của mình trước cả lớp.",
+                "nguyenNhan": "Cảm thấy xấu hổ, bị sỉ nhục, bị tổn thương lòng tự trọng.",
+                "tuKhoa": "giáo viên đọc điểm trước lớp, làm sao khi bị điểm kém",
+                "giaiPhap": "- Giáo viên: Cần tôn trọng sự riêng tư của học sinh, không công khai điểm số."
+            },
+            {
+                "stt": "63",
+                "tinhHuong": "Giáo viên bị áp lực từ phụ huynh về việc \"nâng điểm\" cho con em họ.",
+                "nguyenNhan": "Bệnh thành tích, mong muốn con có học bạ đẹp bằng mọi giá.",
+                "tuKhoa": "xin điểm cho con, bệnh thành tích trong giáo dục",
+                "giaiPhap": "- Giáo viên: Cần giữ vững nguyên tắc, giải thích cho phụ huynh hiểu."
+            },
+            {
+                "stt": "64",
+                "tinhHuong": "Học sinh không đồng ý với lời nhận xét, phê bình của giáo viên.",
+                "nguyenNhan": "Cảm thấy nhận xét không khách quan, quá khắt khe.",
+                "tuKhoa": "nhận xét của giáo viên, phê bình trong học bạ",
+                "giaiPhap": "- Học sinh: Có thể gặp giáo viên để hỏi rõ hơn.\n- Giáo viên: Cần đưa ra những nhận xét cụ thể, mang tính xây dựng."
+            },
+            {
+                "stt": "65",
+                "tinhHuong": "Xung đột khi giáo viên tổ chức kiểm tra lại cho một số bạn điểm thấp nhưng không cho những bạn khác.",
+                "nguyenNhan": "Cảm giác không công bằng, cho rằng giáo viên thiên vị.",
+                "tuKhoa": "kiểm tra lại để gỡ điểm, chính sách công bằng",
+                "giaiPhap": "- Giáo viên: Cần có quy định rõ ràng và công bằng cho tất cả học sinh."
+            },
+            {
+                "stt": "66",
+                "tinhHuong": "Học sinh bị so sánh với một bạn học giỏi khác trong lớp bởi chính giáo viên.",
+                "nguyenNhan": "Gây ra sự tự ti và có thể gây ra sự kiêu ngạo, làm rạn nứt tình bạn.",
+                "tuKhoa": "bị giáo viên so sánh với bạn, con nhà người ta",
+                "giaiPhap": "- Giáo viên: Tuyệt đối không nên so sánh học sinh với nhau."
+            },
+            {
+                "stt": "67",
+                "tinhHuong": "Học sinh có hành vi, lời nói vô lễ, xúc phạm giáo viên trong lớp học.",
+                "nguyenNhan": "Sự bốc đồng, thiếu kiềm chế, ảnh hưởng từ môi trường gia đình, xã hội.",
+                "tuKhoa": "học sinh vô lễ với giáo viên, xúc phạm thầy cô",
+                "giaiPhap": "- Giáo viên: Giữ bình tĩnh, yêu cầu học sinh dừng lại, làm việc riêng sau giờ học.\n- Nhà trường: Cần có biện pháp xử lý nghiêm khắc."
+            },
+            {
+                "stt": "68",
+                "tinhHuong": "Học sinh cảm thấy bị giáo viên thiên vị, đối xử không công bằng giữa các học sinh.",
+                "nguyenNhan": "Cảm nhận chủ quan của học sinh, hoặc giáo viên thực sự có xu hướng ưu ái.",
+                "tuKhoa": "giáo viên thiên vị, đối xử không công bằng",
+                "giaiPhap": "- Giáo viên: Luôn tự rà soát lại hành vi của mình, tạo cơ hội công bằng cho tất cả học sinh."
+            },
+            {
+                "stt": "69",
+                "tinhHuong": "Giáo viên có lời nói mỉa mai, chì chiết, làm tổn thương lòng tự trọng của học sinh.",
+                "nguyenNhan": "Thiếu kỹ năng sư phạm, không kiểm soát được cảm xúc.",
+                "tuKhoa": "giáo viên mắng học sinh, bị sỉ nhục trước lớp",
+                "giaiPhap": "- Giáo viên: Cần được góp ý về phương pháp giáo dục, sỉ nhục không phải là phương pháp hiệu quả.\n- Nhà trường: Tổ chức tập huấn về tâm lý học đường."
+            },
+            {
+                "stt": "70",
+                "tinhHuong": "Học sinh nói xấu, bịa chuyện về giáo viên trên mạng xã hội.",
+                "nguyenNhan": "Sự bất mãn, bức xúc không được giải quyết, muốn \"trả thù\" ẩn danh.",
+                "tuKhoa": "nói xấu giáo viên trên facebook, bị kỷ luật vì nói xấu thầy cô",
+                "giaiPhap": "- Học sinh: Cần hiểu đây là hành vi vi phạm pháp luật.\n- Nhà trường: Xử lý nghiêm minh nhưng cần có tính giáo dục."
+            },
+            {
+                "stt": "71",
+                "tinhHuong": "Mâu thuẫn nảy sinh do sự khác biệt thế hệ, quan điểm sống.",
+                "nguyenNhan": "Khoảng cách thế hệ, giáo viên giữ quan điểm truyền thống trong khi học sinh tiếp cận xu hướng mới.",
+                "tuKhoa": "khác biệt thế hệ thầy trò, giáo viên không hiểu học sinh",
+                "giaiPhap": "- Cả hai bên: Cần có sự cởi mở và đối thoại.\n- Nhà trường: Tổ chức các diễn đàn đối thoại giữa giáo viên và học sinh."
+            },
+            {
+                "stt": "72",
+                "tinhHuong": "Học sinh không chú ý nghe giảng, khi bị nhắc nhở thì tỏ thái độ thách thức.",
+                "nguyenNhan": "Chán nản, không hứng thú với môn học, hoặc có vấn đề cá nhân.",
+                "tuKhoa": "học sinh không nghe giảng, thái độ thách thức giáo viên",
+                "giaiPhap": "- Giáo viên: Tìm hiểu nguyên nhân, đổi mới phương pháp hoặc xử lý nghiêm khắc."
+            },
+            {
+                "stt": "73",
+                "tinhHuong": "Giáo viên từ chối trả lời câu hỏi của học sinh hoặc trả lời qua loa.",
+                "nguyenNhan": "Giáo viên bị quá tải, mệt mỏi, hoặc không đủ kiến thức.",
+                "tuKhoa": "giáo viên không trả lời câu hỏi, quyền được hỏi của học sinh",
+                "giaiPhap": "- Giáo viên: Cần nhận ra trách nhiệm của mình, nếu không biết có thể thừa nhận và tìm hiểu sau."
+            },
+            {
+                "stt": "74",
+                "tinhHuong": "Học sinh cảm thấy sợ hãi, không dám đến lớp vì một giáo viên quá nghiêm khắc.",
+                "nguyenNhan": "Phương pháp sư phạm cứng nhắc, tạo ra môi trường học tập căng thẳng.",
+                "tuKhoa": "sợ giáo viên, áp lực từ thầy cô",
+                "giaiPhap": "- Học sinh: Cần chia sẻ nỗi sợ này với cha mẹ.\n- Giáo viên: Cần được góp ý để điều chỉnh phương pháp.\n- Phụ huynh: Trao đổi với giáo viên một cách xây dựng."
+            },
+            {
+                "stt": "75",
+                "tinhHuong": "Xung đột khi học sinh đang trình bày ý kiến thì bị giáo viên ngắt lời, bác bỏ phũ phàng.",
+                "nguyenNhan": "Giáo viên thiếu kiên nhẫn, không tôn trọng học sinh.",
+                "tuKhoa": "bị giáo viên ngắt lời, không được tôn trọng ý kiến",
+                "giaiPhap": "- Giáo viên: Cần học kỹ năng lắng nghe tích cực, tôn trọng ý kiến học sinh."
+            },
+            {
+                "stt": "76",
+                "tinhHuong": "Cha mẹ ép con học theo ngành nghề mình chọn mà không tôn trọng sở thích, năng lực của con.",
+                "nguyenNhan": "Cha mẹ áp đặt kinh nghiệm, mong muốn của mình lên con.",
+                "tuKhoa": "bị bố mẹ ép chọn ngành, xung đột chọn trường đại học",
+                "giaiPhap": "- Học sinh: Tìm hiểu kỹ về ngành mình yêu thích, trình bày với cha mẹ một cách nghiêm túc.\n- Cha mẹ: Cần lắng nghe và tôn trọng lựa chọn của con."
+            },
+            {
+                "stt": "77",
+                "tinhHuong": "Con bị so sánh liên tục với \"con nhà người ta\" về thành tích học tập.",
+                "nguyenNhan": "Kỳ vọng quá cao của cha mẹ, thói quen so sánh.",
+                "tuKhoa": "áp lực từ con nhà người ta, bị bố mẹ so sánh",
+                "giaiPhap": "- Học sinh: Bày tỏ cảm xúc của mình với cha mẹ.\n- Cha mẹ: Phải dừng ngay việc so sánh, tập trung vào sự cố gắng của con."
+            },
+            {
+                "stt": "78",
+                "tinhHuong": "Con thi trượt nguyện vọng 1 hoặc trượt đại học, gia đình căng thẳng, con bị chì chiết.",
+                "nguyenNhan": "Sự thất vọng của cha mẹ, đổ vỡ kỳ vọng.",
+                "tuKhoa": "thi trượt đại học, bố mẹ thất vọng",
+                "giaiPhap": "- Học sinh: Cần thời gian đối mặt, chủ động tìm các hướng đi khác.\n- Cha mẹ: Đây là lúc con cần sự an ủi và động viên nhất."
+            },
+            {
+                "stt": "79",
+                "tinhHuong": "Cha mẹ đăng ký quá nhiều lớp học thêm cho con, khiến con không còn thời gian nghỉ ngơi.",
+                "nguyenNhan": "Lo lắng con không theo kịp bạn bè, mong muốn con toàn diện.",
+                "tuKhoa": "áp lực học thêm, lịch học dày đặc",
+                "giaiPhap": "- Học sinh: Trao đổi với cha mẹ về lịch học quá tải.\n- Cha mẹ: Cần cân bằng giữa việc học và vui chơi của con."
+            },
+            {
+                "stt": "80",
+                "tinhHuong": "Xung đột về việc chọn ban học (Tự nhiên hay Xã hội).",
+                "nguyenNhan": "Cha mẹ định hướng theo xu hướng xã hội mà không dựa trên năng lực, sở trường của con.",
+                "tuKhoa": "chọn ban tự nhiên hay xã hội, bố mẹ ép học khối A",
+                "giaiPhap": "- Học sinh: Cần hiểu rõ điểm mạnh, điểm yếu của bản thân.\n- Cha mẹ: Tôn trọng quyết định của con dựa trên năng lực thực tế."
+            },
+            {
+                "stt": "81",
+                "tinhHuong": "Cha mẹ không tin tưởng vào khả năng tự học của con, luôn kè kè bên cạnh giám sát.",
+                "nguyenNhan": "Sự lo lắng quá mức, tính kiểm soát cao.",
+                "tuKhoa": "bố mẹ không tin tưởng con, cách để tự học hiệu quả",
+                "giaiPhap": "- Học sinh: Chứng minh bằng hành động, đề nghị cha mẹ cho không gian riêng.\n- Cha mẹ: Cần học cách tin tưởng và \"buông tay\" có kiểm soát."
+            },
+            {
+                "stt": "82",
+                "tinhHuong": "Con muốn tham gia hoạt động ngoại khóa, CLB, nhưng cha mẹ cấm.",
+                "nguyenNhan": "Quan niệm học tập chỉ là kiến thức sách vở.",
+                "tuKhoa": "tham gia hoạt động ngoại khóa, bố mẹ cấm đi chơi",
+                "giaiPhap": "- Học sinh: Giải thích cho cha mẹ về lợi ích của hoạt động ngoại khóa.\n- Cha mẹ: Cần có cái nhìn cởi mở hơn."
+            },
+            {
+                "stt": "83",
+                "tinhHuong": "Mâu thuẫn khi con nhận được kết quả học tập sa sút. Cha mẹ chỉ trích.",
+                "nguyenNhan": "Cha mẹ thất vọng, lo lắng. Con cái xấu hổ, sợ hãi.",
+                "tuKhoa": "học hành sa sút, bị bố mẹ mắng vì điểm kém",
+                "giaiPhap": "- Cha mẹ: Giữ bình tĩnh, cùng con tìm hiểu nguyên nhân.\n- Học sinh: Dũng cảm đối mặt, chia sẻ khó khăn với cha mẹ."
+            },
+            {
+                "stt": "84",
+                "tinhHuong": "Cha mẹ áp đặt cách học của mình lên con.",
+                "nguyenNhan": "Cho rằng phương pháp của mình là đúng đắn nhất.",
+                "tuKhoa": "phương pháp học tập không phù hợp, bố mẹ áp đặt cách học",
+                "giaiPhap": "- Học sinh: Trình bày kết quả và so sánh với phương pháp mình cho là hiệu quả hơn.\n- Cha mẹ: Cần chấp nhận rằng mỗi người có một cách học hiệu quả riêng."
+            },
+            {
+                "stt": "85",
+                "tinhHuong": "Con muốn có một \"gap year\" sau khi tốt nghiệp THPT, nhưng cha mẹ phản đối.",
+                "nguyenNhan": "Cha mẹ sợ con \"lỡ đà\" học tập, lo lắng về rủi ro.",
+                "tuKhoa": "gap year là gì, có nên gap year không",
+                "giaiPhap": "- Học sinh: Cần có một kế hoạch \"gap year\" thật chi tiết và thuyết phục.\n- Cha mẹ: Tìm hiểu về lợi ích của \"gap year\", đặt ra các điều kiện an toàn."
+            },
+            {
+                "stt": "86",
+                "tinhHuong": "Cha mẹ kiểm soát quá mức: đọc trộm tin nhắn, nhật ký, kiểm tra điện thoại của con.",
+                "nguyenNhan": "Lo lắng con bị ảnh hưởng xấu, không tôn trọng không gian riêng tư.",
+                "tuKhoa": "bị bố mẹ đọc trộm tin nhắn, quyền riêng tư của con cái",
+                "giaiPhap": "- Học sinh: Bày tỏ rõ ràng rằng mình cảm thấy không được tôn trọng.\n- Cha mẹ: Phải tôn trọng quyền riêng tư của con, xây dựng lòng tin bằng đối thoại."
+            },
+            {
+                "stt": "87",
+                "tinhHuong": "Mâu thuẫn về phong cách ăn mặc, kiểu tóc.",
+                "nguyenNhan": "Xung đột giữa mong muốn thể hiện cá tính của con và quan niệm của cha mẹ.",
+                "tuKhoa": "bố mẹ không cho nhuộm tóc, xung đột phong cách ăn mặc",
+                "giaiPhap": "- Học sinh: Tìm cách thỏa hiệp, giải thích rằng ngoại hình không quyết định nhân cách.\n- Cha mẹ: Cần cởi mở hơn với các xu hướng của giới trẻ."
+            },
+            {
+                "stt": "88",
+                "tinhHuong": "Bất đồng về việc sử dụng tiền bạc, chi tiêu.",
+                "nguyenNhan": "Con chưa có ý thức về giá trị của tiền, cha mẹ lo lắng con hoang phí.",
+                "tuKhoa": "quản lý chi tiêu cá nhân, xin tiền bố mẹ",
+                "giaiPhap": "- Học sinh: Cần học cách quản lý tài chính.\n- Cha mẹ: Dạy con về giá trị của lao động và tiền bạc."
+            },
+            {
+                "stt": "89",
+                "tinhHuong": "Cha mẹ cấm đoán, can thiệp sâu vào các mối quan hệ bạn bè của con.",
+                "nguyenNhan": "Lo sợ con yêu đương sớm, bị bạn bè xấu lôi kéo.",
+                "tuKhoa": "bố mẹ cấm chơi với bạn, can thiệp vào chuyện bạn bè",
+                "giaiPhap": "- Học sinh: Giới thiệu bạn bè của mình cho cha mẹ biết để tạo sự tin tưởng.\n- Cha mẹ: Thay vì cấm đoán, hãy hướng dẫn con."
+            },
+            {
+                "stt": "90",
+                "tinhHuong": "Xung đột về việc sử dụng thời gian rảnh: cha mẹ muốn con học, con muốn giải trí.",
+                "nguyenNhan": "Cha mẹ lo con xao nhãng học tập, con cần được giải trí để cân bằng.",
+                "tuKhoa": "nghiện game, cân bằng học và chơi",
+                "giaiPhap": "- Cả hai bên: Cùng nhau lập một thời gian biểu hợp lý và cam kết tuân thủ."
+            },
+            {
+                "stt": "91",
+                "tinhHuong": "Cha mẹ bắt con làm việc nhà quá nhiều, ảnh hưởng đến thời gian học.",
+                "nguyenNhan": "Quan niệm con cái phải có trách nhiệm với việc nhà.",
+                "tuKhoa": "con cái làm việc nhà, phân chia công việc gia đình",
+                "giaiPhap": "- Học sinh: Trao đổi với cha mẹ để có lịch phân công hợp lý.\n- Cha mẹ: Cần thông cảm với áp lực học tập của con."
+            },
+            {
+                "stt": "92",
+                "tinhHuong": "Con muốn đi chơi xa, đi phượt cùng bạn bè nhưng cha mẹ không cho phép.",
+                "nguyenNhan": "Nỗi lo của cha mẹ về an toàn, con có nhu cầu khám phá.",
+                "tuKhoa": "xin bố mẹ đi chơi xa, du lịch cùng bạn bè",
+                "giaiPhap": "- Học sinh: Chuẩn bị một kế hoạch chuyến đi thật chi tiết và an toàn.\n- Cha mẹ: Thay vì cấm, hãy xem xét kế hoạch và đưa ra các yêu cầu về an toàn."
+            },
+            {
+                "stt": "93",
+                "tinhHuong": "Mâu thuẫn vì con thể hiện quan điểm chính trị, xã hội trái ngược với cha mẹ.",
+                "nguyenNhan": "Sự khác biệt về thế hệ, nguồn tiếp nhận thông tin.",
+                "tuKhoa": "bất đồng quan điểm chính trị với gia đình, khoảng cách thế hệ",
+                "giaiPhap": "- Cả hai bên: Cần học cách tranh luận một cách tôn trọng, không công kích cá nhân."
+            },
+            {
+                "stt": "94",
+                "tinhHuong": "Cha mẹ so sánh con với anh/chị/em ruột trong nhà.",
+                "nguyenNhan": "Gây ra sự đố kỵ, cạnh tranh không lành mạnh, làm tổn thương lòng tự trọng.",
+                "tuKhoa": "bị so sánh với anh chị em, bố mẹ thiên vị",
+                "giaiPhap": "- Học sinh: Nói chuyện riêng với cha mẹ về cảm xúc của mình.\n- Cha mẹ: Tuyệt đối không so sánh các con với nhau."
+            },
+            {
+                "stt": "95",
+                "tinhHuong": "Con cái có những biểu hiện của rối loạn lo âu, trầm cảm nhưng cha mẹ gạt đi.",
+                "nguyenNhan": "Thiếu kiến thức về sức khỏe tâm thần, định kiến, sợ hãi.",
+                "tuKhoa": "trầm cảm tuổi học đường, bố mẹ không hiểu con",
+                "giaiPhap": "- Học sinh: Tìm kiếm sự giúp đỡ từ các nguồn khác (giáo viên, chuyên gia tâm lý).\n- Cha mẹ: Cần nghiêm túc tìm hiểu về sức khỏe tâm thần, đưa con đi khám nếu cần."
+            },
+            {
+                "stt": "96",
+                "tinhHuong": "Con cái cảm thấy cha mẹ không bao giờ lắng nghe, chỉ áp đặt và ra lệnh.",
+                "nguyenNhan": "Lối giao tiếp một chiều, cha mẹ cho rằng mình luôn đúng.",
+                "tuKhoa": "bố mẹ không lắng nghe con, cách nói chuyện để bố mẹ hiểu",
+                "giaiPhap": "- Học sinh: Chọn thời điểm thích hợp để bắt đầu cuộc trò chuyện, bày tỏ cảm xúc không chỉ trích.\n- Cha mẹ: Học kỹ năng lắng nghe tích cực, đặt câu hỏi thay vì ra lệnh."
+            },
+            {
+                "stt": "97",
+                "tinhHuong": "Cha mẹ thường xuyên nhắc lại những lỗi lầm trong quá khứ của con.",
+                "nguyenNhan": "Thói quen chì chiết, muốn dùng lỗi cũ để tăng \"sức nặng\" cho lời nói.",
+                "tuKhoa": "bị bố mẹ nhắc lại chuyện cũ, cách giao tiếp không chì chiết",
+                "giaiPhap": "- Học sinh: Có thể nói thẳng rằng chuyện đó đã qua rồi.\n- Cha mẹ: Cần học cách giải quyết dứt điểm từng vấn đề."
+            },
+            {
+                "stt": "98",
+                "tinhHuong": "Xung đột xảy ra ngay trước mặt người khác, khiến con cảm thấy xấu hổ.",
+                "nguyenNhan": "Cha mẹ không kiềm chế được cảm xúc, không ý thức được việc làm tổn thương lòng tự trọng của con.",
+                "tuKhoa": "bị mắng trước mặt người khác, bố mẹ làm con xấu hổ",
+                "giaiPhap": "- Học sinh: Im lặng và đợi đến khi chỉ có hai mẹ con/bố con để nói chuyện.\n- Cha mẹ: Tuyệt đối không nên phê bình, la mắng con trước mặt người khác."
+            },
+            {
+                "stt": "99",
+                "tinhHuong": "Con cái có vấn đề ở trường nhưng giấu giếm, không dám nói với cha mẹ vì sợ bị mắng.",
+                "nguyenNhan": "Mối quan hệ thiếu tin tưởng, con sợ phản ứng tiêu cực của cha mẹ.",
+                "tuKhoa": "không dám nói chuyện với bố mẹ, sợ bị mắng",
+                "giaiPhap": "- Học sinh: Cần nhận ra rằng giấu giếm chỉ làm vấn đề tồi tệ hơn.\n- Cha mẹ: Phải tạo ra một không gian an toàn để con dám nói ra sự thật."
+            },
+            {
+                "stt": "100",
+                "tinhHuong": "Cha mẹ và con cái bất đồng trong việc thể hiện tình cảm.",
+                "nguyenNhan": "Sự thay đổi tâm lý tự nhiên của tuổi vị thành niên, nhu cầu về không gian cá nhân tăng lên.",
+                "tuKhoa": "con cái xa cách bố mẹ, tuổi dậy thì khó gần",
+                "giaiPhap": "- Học sinh: Có thể nhẹ nhàng giải thích và đề nghị một cách thể hiện tình cảm khác.\n- Cha mẹ: Cần thấu hiểu và tôn trọng sự thay đổi của con."
+            }
+        ];
+ 
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('results');
+        const initialMessage = document.getElementById('initialMessage');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+ 
+        function normalizeText(text) {
+            return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+ 
+        function displayResults(results) {
+            resultsContainer.innerHTML = '';
+            
+            if (results.length === 0 && searchInput.value.length > 0) {
+                noResultsMessage.classList.remove('hidden');
+                initialMessage.classList.add('hidden');
+            } else if (searchInput.value.length === 0) {
+                initialMessage.classList.remove('hidden');
+                noResultsMessage.classList.add('hidden');
+            } else {
+                initialMessage.classList.add('hidden');
+                noResultsMessage.classList.add('hidden');
+            }
+ 
+            results.forEach((item, index) => {
+                const resultCard = document.createElement('div');
+                resultCard.className = 'result-card'; // Add base class
+                resultCard.innerHTML = `
+                    <div>
+                        <h3 class="font-bold mb-3">${item.stt}. ${item.tinhHuong}</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold">Nguyên nhân:</h4>
+                                <p class="whitespace-pre-line">${item.nguyenNhan}</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Giải pháp:</h4>
+                                <p class="whitespace-pre-line">${item.giaiPhap}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-4 mt-auto">
+                         <p class="text-sm italic" style="color: #a0aec0">Từ khóa: ${item.tuKhoa}</p>
+                    </div>
+                `;
+                resultsContainer.appendChild(resultCard);
+ 
+                // Stagger the animation
+                setTimeout(() => {
+                    resultCard.classList.add('visible');
+                }, index * 100);
+            });
+        }
+ 
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = normalizeText(e.target.value);
+ 
+            if (searchTerm.length === 0) {
+                resultsContainer.innerHTML = '';
+                displayResults([]);
+                return;
+            }
+ 
+            const filteredData = data.filter(item => {
+                return normalizeText(item.tinhHuong).includes(searchTerm) ||
+                       normalizeText(item.nguyenNhan).includes(searchTerm) ||
+                       normalizeText(item.tuKhoa).includes(searchTerm);
+            });
+ 
+            displayResults(filteredData);
+        });
+    </script>
+</body>
+</html>
+ 
+ 
+
